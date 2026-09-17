@@ -1,0 +1,21 @@
+# Android/IntelliJ
+.gradle/
+/local.properties
+//.idea/
+*.iml
+build/
+captures/
+
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+
+# Node
+node_modules/
+dist/
+
+# Keystore
+*.jks
