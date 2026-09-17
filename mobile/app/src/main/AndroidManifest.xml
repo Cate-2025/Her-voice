@@ -4,6 +4,8 @@
     <application
         android:label="HERVOICE"
         android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar">
+        <activity android:name=".RegisterActivity" />
+        <activity android:name=".LoginActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
