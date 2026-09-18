@@ -1,21 +1,18 @@
-# Android/IntelliJ
-.gradle/
-/local.properties
-//.idea/
-*.iml
-build/
-captures/
-
-# macOS
-.DS_Store
-
 # Python
 __pycache__/
-*.pyc
+*.py[cod]
+.venv/
+.env
 
 # Node
 node_modules/
 dist/
 
-# Keystore
-*.jks
+# Local tooling
+.DS_Store
+
+# Android local caches, SDK path and generated builds
+.gradle/
+.kotlin/
+local.properties
+mobile/**/build/

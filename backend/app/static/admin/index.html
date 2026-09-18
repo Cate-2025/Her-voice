@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>HERVOICE Officer Dashboard</title>
+    <link rel="stylesheet" href="/admin/styles.css">
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="eyebrow">Authorised personnel only</p>
+        <h1>HERVOICE case review</h1>
+        <p>Reports are allegations. Review them under the university’s approved safeguarding process.</p>
+      </header>
+      <section id="login-panel" aria-labelledby="login-title">
+        <h2 id="login-title">Officer sign in</h2>
+        <form id="login-form">
+          <label>Email <input id="email" type="email" autocomplete="username" required></label>
+          <label>Password <input id="password" type="password" autocomplete="current-password" required></label>
+          <button>Sign in</button>
+        </form>
+      </section>
+      <section id="dashboard" hidden>
+        <div class="toolbar"><h2>Case queue</h2><button id="sign-out" class="secondary">Sign out</button></div>
+        <p id="message" role="status"></p>
+        <div class="grid">
+          <section><h3>Reports</h3><div id="case-list" class="list"></div></section>
+          <section><h3>Case details</h3><div id="case-detail">Select a report to view its timeline.</div></section>
+          <section><h3>Review alerts</h3><div id="alert-list" class="list"></div></section>
+        </div>
+      </section>
+    </main>
+    <script src="/admin/app.js"></script>
+  </body>
+</html>
