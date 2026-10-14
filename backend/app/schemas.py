@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.models import CaseStatus, ReportMode, Role
 
@@ -17,12 +17,21 @@ class TokenResponse(BaseModel):
 
 
 class TimelineEventCreate(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
     occurred_at: datetime
     location_hint: str | None = Field(default=None, max_length=255)
     narrative: str = Field(min_length=1, max_length=10_000)
 
+    @field_validator("occurred_at")
+    @classmethod
+    def timezone_required(cls, value: datetime) -> datetime:
+        if value.tzinfo is None or value.utcoffset() is None:
+            raise ValueError("Date and time must include a timezone offset")
+        return value
+
 
 class ReportCreate(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
     report_mode: ReportMode
     subject_staff_ref: str = Field(min_length=2, max_length=128)
     course_ref: str | None = Field(default=None, max_length=128)
@@ -39,6 +48,7 @@ class ReportResponse(BaseModel):
     course_ref: str | None
     status: CaseStatus
     created_at: datetime
+    submitted_at: datetime | None
 
 
 class OfficerReportResponse(ReportResponse):
@@ -101,3 +111,17 @@ class UserSummary(BaseModel):
     id: UUID
     email: str
     role: Role
+
+
+class EvidenceSummary(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: UUID
+    original_name: str
+    content_type: str
+    byte_size: int
+    verification_status: str
+
+
+class StudentReportDetail(ReportResponse):
+    timeline: list[TimelineEventResponse]
+    evidence: list[EvidenceSummary]

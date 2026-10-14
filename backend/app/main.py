@@ -5,7 +5,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.routers import auth, evidence, notifications, officer, reports
 
-app = FastAPI(title="HERVOICE API", version="0.1.0", docs_url="/docs")
+app = FastAPI(title="HERVOICE API", version="0.2.0", docs_url="/docs")
 app.include_router(auth.router)
 app.include_router(reports.router)
 app.include_router(evidence.router)

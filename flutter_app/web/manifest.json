@@ -1,0 +1,19 @@
+{
+  "name": "HERVOICE Preview",
+  "short_name": "HERVOICE",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#F8F6F2",
+  "theme_color": "#654A69",
+  "description": "HERVOICE \u2014 fictional UI preview",
+  "orientation": "portrait-primary",
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

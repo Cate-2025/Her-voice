@@ -1,3 +1,5 @@
+> Original backend structure reference. For changes to draft visibility, finalisation, evidence state, and migrations, consult [the current contract](API_CONTRACT.md) and [implementation progress](IMPLEMENTATION_PROGRESS.md).
+
 # HERVOICE Backend Structure Reference
 
 Use this document as the source for an architecture diagram. Solid arrows below are implemented interfaces; proposed arrows are labelled. See [API_CONTRACT.md](API_CONTRACT.md) for exact routes and current gaps.

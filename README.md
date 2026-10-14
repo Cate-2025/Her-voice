@@ -6,7 +6,7 @@ Project: HERVOICE — A Secure Mobile Platform for Reporting and Coordinating Su
 
 This repository contains the HERVOICE prototype (Android client + backend).
 
-Start here: [three-week implementation plan](docs/IMPLEMENTATION_PLAN.md), then [API contract and integration gaps](docs/API_CONTRACT.md). The Android screen demo runs independently; the backend and dashboard still need local setup and fictional users.
+Start here: [Flutter redesign and implementation plan](docs/FLUTTER_IMPLEMENTATION_PLAN.md), [implementation progress](docs/IMPLEMENTATION_PROGRESS.md), then [current API contract](docs/API_CONTRACT.md). The Android screen demo runs independently. The backend now supports a protected server draft → submit flow without attachments, Alembic migrations, and fictional user seeding; see its setup instructions. An interactive Flutter UI preview now lives in `flutter_app/`; it uses explicitly fictional, session-only data.
 
 Suggested branch strategy
 
@@ -16,7 +16,8 @@ Suggested branch strategy
 
 Directory layout
 
-- `mobile/` — Android application (collaborator work)
+- `flutter_app/` — new Flutter student UI ([run instructions](flutter_app/README.md))
+- `mobile/` — legacy Compose screen-flow reference
 - `backend/` — FastAPI, PostgreSQL/MinIO services, and officer dashboard
 - `docs/` — design docs, wireframes, interviews, and the delivery plan
 
@@ -24,12 +25,14 @@ Current backend progress
 
 - Backend scaffold: auth, role checks, report/case schema, submission flow, officer endpoints, audit records, signed evidence URLs, generic in-app notifications, and an initial review-alert rule. See the plan for unfinished flows.
 - Officer dashboard shell: `http://localhost:8000/admin` after running the backend.
-- Plan: [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md).
+- Current plan: [docs/FLUTTER_IMPLEMENTATION_PLAN.md](docs/FLUTTER_IMPLEMENTATION_PLAN.md).
+- Earlier Compose delivery plan: [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md).
 - Backend diagram reference: [docs/BACKEND_STRUCTURE.md](docs/BACKEND_STRUCTURE.md).
 - API contract: [docs/API_CONTRACT.md](docs/API_CONTRACT.md).
+- Flutter UI design: [docs/FLUTTER_UI.md](docs/FLUTTER_UI.md).
 - Android screen-flow starter: [mobile/README.md](mobile/README.md).
 
 Next steps
 
-- Follow the Week 1 checklist in the implementation plan.
-- Create `feature/backend-foundation` and `feature/mobile-report-flow` branches, then integrate through `develop`.
+- Follow the ordered packages and acceptance gates in the Flutter plan.
+- Work currently begins on `feature/flutter-foundation` from the FastAPI `backend` baseline; reconcile the divergent `develop` branch before integration.

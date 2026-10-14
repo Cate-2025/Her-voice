@@ -42,11 +42,14 @@ class User(Base):
 
 class Report(Base):
     __tablename__ = "reports"
+    __table_args__ = (UniqueConstraint("reporter_id", "idempotency_key", name="uq_report_owner_operation"),)
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     reporter_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True, index=True)
     report_mode: Mapped[ReportMode] = mapped_column(Enum(ReportMode), nullable=False)
     case_code: Mapped[str | None] = mapped_column(String(32), unique=True, nullable=True, index=True)
-    idempotency_key: Mapped[str | None] = mapped_column(String(128), unique=True, nullable=True)
+    idempotency_key: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    payload_sha256: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    submitted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     subject_staff_ref: Mapped[str] = mapped_column(String(128), index=True)
     course_ref: Mapped[str | None] = mapped_column(String(128), nullable=True)
     status: Mapped[CaseStatus] = mapped_column(Enum(CaseStatus), default=CaseStatus.DRAFT, index=True)
@@ -74,7 +77,8 @@ class Evidence(Base):
     content_type: Mapped[str] = mapped_column(String(128))
     byte_size: Mapped[int] = mapped_column(Integer)
     sha256: Mapped[str] = mapped_column(String(64))
-    uploaded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    verification_status: Mapped[str] = mapped_column(String(16), default="reserved", server_default="reserved")
+    uploaded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
 class Notification(Base):

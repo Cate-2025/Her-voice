@@ -19,7 +19,7 @@ def audit(db: Session, actor: User, action: str, report_id: UUID | None = None, 
 
 def get_report_or_404(db: Session, report_id: UUID) -> Report:
     report = db.get(Report, report_id)
-    if not report:
+    if not report or report.status == CaseStatus.DRAFT:
         raise HTTPException(status_code=404, detail="Case not found")
     return report
 
@@ -30,7 +30,7 @@ def case_queue(
     officer: User = Depends(require_roles(Role.OFFICER, Role.ADMIN)),
     db: Session = Depends(get_db),
 ) -> list[Report]:
-    query = db.query(Report)
+    query = db.query(Report).filter(Report.status != CaseStatus.DRAFT)
     if status_filter:
         query = query.filter(Report.status == status_filter)
     cases = query.order_by(Report.updated_at.desc()).all()
@@ -59,8 +59,21 @@ def change_case_status(
     officer: User = Depends(require_roles(Role.OFFICER, Role.ADMIN)),
     db: Session = Depends(get_db),
 ) -> Report:
-    report = get_report_or_404(db, report_id)
+    report = db.query(Report).filter(Report.id == report_id, Report.status != CaseStatus.DRAFT).with_for_update().one_or_none()
+    if not report:
+        raise HTTPException(status_code=404, detail="Case not found")
     old_status = report.status
+    if payload.status == old_status:
+        return report
+    transitions = {
+        CaseStatus.SUBMITTED: {CaseStatus.RECEIVED},
+        CaseStatus.RECEIVED: {CaseStatus.UNDER_REVIEW},
+        CaseStatus.UNDER_REVIEW: {CaseStatus.ACTION_REQUIRED, CaseStatus.CLOSED},
+        CaseStatus.ACTION_REQUIRED: {CaseStatus.UNDER_REVIEW},
+        CaseStatus.CLOSED: set(),
+    }
+    if payload.status not in transitions.get(old_status, set()):
+        raise HTTPException(status_code=409, detail="Invalid case status transition")
     report.status = payload.status
     if report.reporter_id:
         db.add(Notification(user_id=report.reporter_id))

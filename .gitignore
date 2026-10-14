@@ -16,3 +16,9 @@ dist/
 .kotlin/
 local.properties
 mobile/**/build/
+
+# Flutter and local test caches
+.dart_tool/
+.flutter-plugins-dependencies
+flutter_app/build/
+.pytest_cache/

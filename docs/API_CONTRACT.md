@@ -1,22 +1,18 @@
-# HERVOICE API Contract and Integration Gaps
+# HERVOICE API contract — Flutter foundation
 
-The prefix is `/api/v1`. JSON requests use `Content-Type: application/json`; protected endpoints use `Authorization: Bearer <access_token>`. The current source of truth is `backend/app/routers/` and the generated `/docs` page when the API runs. This document distinguishes **implemented now** from **proposed before Android integration**.
+Updated 12 October 2026. Prefix `/api/v1`; JSON requests and bearer authentication. Current implementation source: `backend/app/routers/`; generated schema: `/openapi.json`; checked-in snapshot: [openapi.json](openapi.json). This contract describes the first refactor milestone, not the full target in [FLUTTER_IMPLEMENTATION_PLAN.md](FLUTTER_IMPLEMENTATION_PLAN.md).
 
-## Implemented requests
+## Session
 
-### Login
+`POST /auth/login` accepts `{"email":"student@example.test","password":"your-fictional-password"}` and returns `access_token`/`token_type`. Access tokens expire after the configured period (30 minutes by default). There is no refresh, registration, or password recovery endpoint yet.
 
-`POST /api/v1/auth/login`
+`GET /auth/me` returns `id`, `email`, and `role`. Store credentials using platform-backed storage in the future Flutter app. Reauthenticate on `401`; retain the local encrypted draft.
 
-```json
-{"email":"student@example.test","password":"fictional-password"}
-```
+## Draft → submit (implemented, without attachments)
 
-Returns `{"access_token":"...","token_type":"bearer"}`. No registration, token refresh, or development seed account exists yet.
+Create a server draft only when the student explicitly starts online submission. Ordinary draft saving remains local in the future Flutter client.
 
-### Authenticated report
-
-`POST /api/v1/reports` (student token)
+`POST /reports/drafts` (student token):
 
 ```json
 {
@@ -32,45 +28,48 @@ Returns `{"access_token":"...","token_type":"bearer"}`. No registration, token r
 }
 ```
 
-Returns `201` and `id`, `report_mode`, `case_code`, `subject_staff_ref`, `course_ref`, `status`, `created_at`. Today status becomes `submitted` immediately. The same idempotency key returns the original report for the same student; the implementation does not yet check that a repeated payload is identical.
+Returns `201` with `id`, `report_mode`, `case_code` (null for authenticated reporting), `subject_staff_ref`, `course_ref`, `status=draft`, `created_at`, and `submitted_at=null`. Server draft creation requires complete incident fields; partial offline editing is a client responsibility. Timestamps require timezone offsets. Whitespace-only required fields fail validation.
 
-`POST /api/v1/anonymous-reports` uses the same body and no token. The API forces `report_mode=anonymous`, stores no reporter ID, and returns a case code. There is no case-code lookup or anonymous evidence path yet. This route needs abuse controls before real use.
+The key is scoped to the authenticated account. Same key and canonical payload return the original report, including after finalisation. Same key with different content returns `409`. Equivalent timezone representations are canonicalised to UTC. Keep the payload snapshot and key stable through retries. Concurrent creation is protected by a database uniqueness constraint.
 
-The case code is currently stored in plaintext. Before building case-code lookup, store a verifier/hash instead and decide how lost codes are handled without deanonymising the student.
+`GET /reports/{id}` returns the owner's report summary, timeline, and evidence metadata/state. Another student's report returns `404`; an officer using this student route gets `403`. No signed storage URLs or reporter identity are included in this response.
 
-`GET /api/v1/cases/mine` returns only the authenticated student’s report summaries. It does not return timeline or evidence details. `GET /api/v1/notifications` returns neutral notification records; `POST /api/v1/notifications/{id}/read` marks one read.
+`POST /reports/{id}/submit` has no body. It locks the report, verifies incident presence and evidence readiness, and commits `status=submitted` with `submitted_at`. Retrying returns the same report and timestamp; if an officer has subsequently changed the status, the response returns that current status. Keep the original server ID after a lost success response.
 
-### Officer
+`GET /cases/mine` returns submitted case summaries only. Server drafts are excluded. Pagination and status history remain planned.
 
-`GET /api/v1/officer/cases` returns report summaries. `GET /api/v1/officer/cases/{report_id}` adds timeline events. `PATCH /api/v1/officer/cases/{report_id}/status` accepts `{"status":"under_review"}`. Officer/admin roles are enforced. The current API accepts any enum status, including invalid backward transitions, so implement transition rules before integration.
+The former `POST /reports` returns `410` with replacement instructions. `POST /anonymous-reports` returns `503` while anonymous capabilities/recovery are unimplemented. The authenticated draft route rejects `report_mode=anonymous`. Identified and confidential enum values remain accepted; a distinct identity-visibility policy has not yet been implemented.
 
-`GET /api/v1/officer/pattern-alerts` lists internal alerts. `POST /api/v1/officer/pattern-alerts/{alert_id}/review` marks one reviewed. The current dashboard lists alerts but does not offer a review control.
+## Evidence: incomplete lifecycle, integration deferred
 
-### Evidence today
+The existing `POST /evidence/reports/{report_id}/upload-url` reserves an attachment only on an owned server draft. It accepts `original_name`, allowed `content_type`, positive `byte_size`, and hex `sha256`, and returns `evidence_id`, `object_key`, and `upload_url`.
 
-`POST /api/v1/evidence/reports/{report_id}/upload-url` is available only to the authenticated report owner. It accepts `original_name`, `content_type`, `byte_size`, and a 64-character hex `sha256`. It returns `evidence_id`, `object_key`, and `upload_url`. The client sends the bytes with HTTP `PUT` to `upload_url`, using the exact signed `Content-Type`.
+Reservation records `verification_status=reserved` and no upload timestamp. A file PUT is not verification. There is **no completion endpoint yet**, so a report with reserved evidence cannot be finalised. Use the no-attachment flow for the first milestone. The future lifecycle must verify bytes and protect verified objects from overwrite before enabling attachment submission.
 
-The current API writes evidence metadata **before** upload, does not verify the object afterwards, does not create the bucket, and does not provide an evidence-list endpoint. `GET /api/v1/evidence/{evidence_id}/download-url` issues an officer/admin download URL but does not currently audit it. A signed URL can be used by whoever possesses it until expiry. Do not rely on this route for a real evidence demo until these gaps are closed.
+The legacy officer download route returns `404` for draft evidence and `409` for unverified evidence. Migrated evidence is unverified until explicitly revalidated in a future migration/tool. Bucket setup, completion, cleanup, idempotent reservation, and case-scoped download audit remain required.
 
-## Proposed contract to freeze before Android integration
+## Officer cases
 
-1. `POST /reports/drafts` creates a server draft only when the student explicitly starts online submission; the device’s offline draft remains local.
-2. `POST /reports/{id}/evidence/upload-url` reserves an evidence record and returns a signed upload target.
-3. Client `PUT`s bytes to object storage. It calls `POST /reports/{id}/evidence/{evidence_id}/complete`; API verifies the object and marks evidence `uploaded`.
-4. `POST /reports/{id}/submit` validates the incident and completed evidence, changes status to `submitted`, and is safe to retry.
-5. `GET /reports/{id}` returns the student’s own timeline/evidence and current status; `GET /officer/cases/{id}` includes the officer evidence list.
-6. `GET /officer/cases/{id}/evidence/{evidence_id}/download-url` authorises and audits the officer’s access.
+Existing routes: `GET /officer/cases`, `GET /officer/cases/{id}`, `PATCH /officer/cases/{id}/status`. Officer/admin role required; drafts are hidden, including direct-ID requests.
 
-These six endpoints are **not implemented**. If the team chooses a simpler order, update this document and both clients before implementation. Do not invent a `/complete` call in the Android client against the current API.
+Status payload: `{"status":"received"}`. Allowed transitions:
 
-## Error and retry decisions
+```text
+submitted → received → under_review → closed
+                           ↕
+                     action_required
+```
 
-- Use `401` for missing/expired authentication, `403` for a valid account with the wrong role, `404` for a resource hidden from that caller, `409` for an idempotency conflict or invalid state transition, `413` for oversized evidence, and `422` for malformed fields. Some current routes do not yet follow this exactly.
-- Keep one random idempotency key per logical report through all retries. Never create a new key merely because the response timed out.
-- Dates must be ISO 8601 with a timezone offset. The Android UI should use a date/time picker; avoid parsing free-text dates.
-- Return a stable server case ID and explicit sync/upload states so the UI never displays a local draft as submitted.
-- Define pagination before case queues grow; the prototype may use an unpaginated list with fictional data only.
+Repeated identical status is a no-op. Invalid/backward transitions return `409`. The existing case action is audited and produces one neutral notification for each successful status change. Full history, stale-version conflict handling, assignment-scoped access, and officer evidence listings are later work. Product wording for `action_required` still requires review before exposing it in Flutter.
 
-## Network setup for development
+## Notifications and alerts
 
-Android emulator reaches a host API at `http://10.0.2.2:8000`; a physical device needs the host’s LAN address and a reachable firewall port. The currently generated MinIO signed URL uses its configured endpoint and must also be reachable by the Android client. A Docker-only hostname such as `minio` will not work on a phone. Development cleartext HTTP may require an Android debug network configuration; use HTTPS for any shared demo environment.
+`GET /notifications` and `POST /notifications/{id}/read` remain available. No FCM sender or device-token registration exists. Notification previews use neutral text.
+
+Pattern alerts count distinct authenticated reporters over 90 days based on submission time (legacy records fall back to creation time), including submitted cases later closed. Drafts and anonymous reports are excluded. Evaluation serialises per staff reference and reuses an active unreviewed task. Matching still relies on free-text staff references; canonical matching and legacy duplicate-alert reconciliation remain planned. Alerts require human review and do not establish misconduct.
+
+## Errors and development networking
+
+Current errors use FastAPI's `detail` response: `401` missing/expired authentication, `403` wrong role, `404` hidden/absent resource, `409` conflicting operation/state, `422` malformed fields. Stable machine-readable error codes/request IDs and rate limiting are future work. Current evidence size/type rejection may use `400`; align to the target contract during evidence implementation.
+
+Android emulator API: `http://10.0.2.2:8000`; physical device: a reachable host LAN address. Signed storage URLs must also be reachable from that device. Docker-only names such as `minio` cannot be used by a phone. Shared environments require HTTPS; permit cleartext only in isolated development builds.

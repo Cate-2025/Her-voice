@@ -35,8 +35,10 @@ async function refresh() {
 async function openCase(id) {
   try {
     const item = await api(`/officer/cases/${id}`);
+    const transitions = { submitted: ["received"], received: ["under_review"], under_review: ["action_required", "closed"], action_required: ["under_review"], closed: [] };
+    const nextStatuses = transitions[item.status] || [];
     const events = item.timeline.map(event => `<div class="event"><strong>${escapeHtml(new Date(event.occurred_at).toLocaleString())}</strong><br>${escapeHtml(event.narrative)}</div>`).join("");
-    document.querySelector("#case-detail").innerHTML = `<p><strong>Status:</strong> ${item.status.replaceAll("_", " ")}</p><label>Update status <select id="case-status">${["received", "under_review", "action_required", "closed"].map(status => `<option ${status === item.status ? "selected" : ""}>${status}</option>`).join("")}</select></label><button id="update-status">Save status</button><h4>Incident timeline</h4>${events}`;
-    document.querySelector("#update-status").onclick = async () => { await api(`/officer/cases/${id}/status`, { method: "PATCH", body: JSON.stringify({ status: document.querySelector("#case-status").value }) }); await refresh(); message("Status updated. The student receives a generic confidential notification."); };
+    document.querySelector("#case-detail").innerHTML = `<p><strong>Status:</strong> ${item.status.replaceAll("_", " ")}</p><label>Update status <select id="case-status">${[item.status, ...nextStatuses].map(status => `<option ${status === item.status ? "selected" : ""}>${status}</option>`).join("")}</select></label><button id="update-status" ${nextStatuses.length ? "" : "disabled"}>Save status</button><h4>Incident timeline</h4>${events}`;
+    document.querySelector("#update-status").onclick = async () => { try { await api(`/officer/cases/${id}/status`, { method: "PATCH", body: JSON.stringify({ status: document.querySelector("#case-status").value }) }); await refresh(); await openCase(id); message("Status saved."); } catch (error) { message(error.message); } };
   } catch (error) { message(error.message); }
 }

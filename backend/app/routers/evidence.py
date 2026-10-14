@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.database import get_db
-from app.models import Evidence, Report, Role, User
+from app.models import CaseStatus, Evidence, Report, Role, User
 from app.schemas import EvidenceDownloadTarget, EvidenceUploadRequest, EvidenceUploadTarget
 from app.security import get_current_user, require_roles
 from app.services.storage import ALLOWED_MIME_TYPES, object_key, presigned_download_url, presigned_upload_url
@@ -14,7 +14,7 @@ router = APIRouter(prefix="/api/v1/evidence", tags=["evidence"])
 
 
 def owned_report(db: Session, report_id: uuid.UUID, user: User) -> Report:
-    report = db.get(Report, report_id)
+    report = db.query(Report).filter(Report.id == report_id).with_for_update().one_or_none()
     if not report or report.reporter_id != user.id:
         raise HTTPException(status_code=404, detail="Report not found")
     return report
@@ -29,7 +29,9 @@ def create_upload_target(
 ) -> EvidenceUploadTarget:
     if user.role != Role.STUDENT:
         raise HTTPException(status_code=403, detail="Student access required")
-    owned_report(db, report_id, user)
+    report = owned_report(db, report_id, user)
+    if report.status != CaseStatus.DRAFT:
+        raise HTTPException(status_code=409, detail="Evidence can only be added to a server draft")
     if payload.content_type not in ALLOWED_MIME_TYPES or payload.byte_size > settings.max_evidence_bytes:
         raise HTTPException(status_code=400, detail="Evidence type or size is not permitted")
     evidence_id = uuid.uuid4()
@@ -47,6 +49,9 @@ def evidence_download_url(
     db: Session = Depends(get_db),
 ) -> EvidenceDownloadTarget:
     evidence = db.get(Evidence, evidence_id)
-    if not evidence:
+    report = db.get(Report, evidence.report_id) if evidence else None
+    if not evidence or not report or report.status == CaseStatus.DRAFT:
         raise HTTPException(status_code=404, detail="Evidence not found")
+    if evidence.verification_status != "verified":
+        raise HTTPException(status_code=409, detail="Evidence has not been verified")
     return EvidenceDownloadTarget(download_url=presigned_download_url(evidence.object_key))

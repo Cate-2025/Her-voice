@@ -1,5 +1,7 @@
 # HERVOICE Three Week Implementation Plan
 
+> Historical Compose plan (18 September 2026). Current Flutter work follows [FLUTTER_IMPLEMENTATION_PLAN.md](FLUTTER_IMPLEMENTATION_PLAN.md) and [IMPLEMENTATION_PROGRESS.md](IMPLEMENTATION_PROGRESS.md). The current API differs from the snapshot below.
+
 ## Goal and delivery boundary
 
 Build a demonstrable student Android app, REST API, and officer dashboard for one university. A fictional student should be able to submit a report with one timeline event and one evidence file; an officer should be able to review it, update status, and trigger a generic student update. A rule may flag multiple reports for human review. The application must never describe a report or alert as proof of misconduct.

@@ -1,3 +1,5 @@
+> Legacy Compose reference. Flutter migration is tracked in [the current plan](../docs/FLUTTER_IMPLEMENTATION_PLAN.md). This demo remains in-memory; its older integration sequence below is historical. Use [the current contract](../docs/API_CONTRACT.md) for new client work.
+
 # Android application starter
 
 The first Compose implementation is deliberately a screen-flow prototype. It includes sign-in, private case list, incident documentation, review, and submission confirmation. It currently uses in-memory demo data rather than a network client.
