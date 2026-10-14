@@ -1,0 +1,18 @@
+# Analysis options for the HERVOICE Flutter client.
+include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+    # The prototype favours explicitness in the privacy-critical code paths.
+    always_declare_return_types: true
+    avoid_print: true
+    prefer_final_locals: true
+    unawaited_futures: true
+
+analyzer:
+  errors:
+    # Treat privacy-relevant slips as build failures.
+    todo: ignore
+  exclude:
+    - build/**
+    - android/**

@@ -1,0 +1,25 @@
+{
+   "version": "2.0.0",
+   "tasks": [
+      {
+         "label": "Flutter: boot emulator (Medium_Phone_API_36.1)",
+         "type": "shell",
+         "command": "${env:LOCALAPPDATA}\\Android\\Sdk\\emulator\\emulator.exe -avd Medium_Phone_API_36.1 -no-snapshot-load",
+         "problemMatcher": []
+      },
+      {
+         "label": "Backend: start HERVOICE API",
+         "type": "shell",
+         "command": "node index.js",
+         "options": {"cwd": "${workspaceFolder}/backend"},
+         "problemMatcher": []
+      },
+      {
+         "label": "Flutter: run HERVOICE (cmd)",
+         "type": "shell",
+         "command": "cmd /c C:\\src\\flutter\\bin\\flutter.bat run",
+         "options": {"cwd": "${workspaceFolder}/mobile_flutter"},
+         "problemMatcher": []
+      }
+   ]
+}

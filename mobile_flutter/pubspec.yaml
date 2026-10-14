@@ -1,0 +1,54 @@
+name: hervoice
+description: >-
+  HERVOICE - A secure mobile platform for reporting and coordinating support for
+  sexual harassment in universities. Flutter client for the BSE 3106 prototype.
+publish_to: 'none'
+
+version: 0.2.0+2
+
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  # State management and dependency injection for the controllers.
+  provider: ^6.1.2
+
+  # HTTP/REST transport to the HERVOICE backend (section 3.11).
+  http: ^1.2.2
+
+  # Encrypted-at-rest storage for the authentication token (section 3.12 IV).
+  flutter_secure_storage: ^9.2.2
+
+  # Local draft queue backing offline-first reporting (sections 3.7 and 7.3).
+  sqflite: ^2.3.3
+  path: ^1.9.0
+
+  # Lightweight preferences (base URL, privacy-safe notification preference).
+  shared_preferences: ^2.3.2
+
+  # Connectivity detection used to decide when to flush the offline queue.
+  connectivity_plus: ^6.0.5
+
+  # Mobile evidence capture: screenshots, photographs and existing files
+  # (messages, emails, documents and permitted audio recordings).
+  image_picker: ^1.1.2
+  file_picker: ^8.1.2
+
+  # Formatting of the incident timeline.
+  intl: ^0.19.0
+
+  # Client-generated references that make offline synchronisation idempotent.
+  uuid: ^4.5.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true

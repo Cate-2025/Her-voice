@@ -1,6 +1,9 @@
 package com.hervoice.app
 
+import android.content.Intent
 import android.os.Bundle
+import android.widget.Button
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
@@ -17,13 +20,11 @@ class MainActivity : AppCompatActivity() {
         }
 
         btnReport.setOnClickListener {
-            // TODO: navigate to incident reporting screen
-            Toast.makeText(this, "Incident reporting (todo)", Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this, ReportActivity::class.java))
         }
 
         btnEvidence.setOnClickListener {
-            // TODO: navigate to evidence vault screen
-            Toast.makeText(this, "Evidence vault (todo)", Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this, EvidenceVaultActivity::class.java))
         }
     }
 }

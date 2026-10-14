@@ -23,6 +23,7 @@ class LoginActivity : AppCompatActivity() {
         val etEmail = findViewById<EditText>(R.id.et_email)
         val etPassword = findViewById<EditText>(R.id.et_password)
         val btnLogin = findViewById<Button>(R.id.btn_login)
+        val btnGoToRegister = findViewById<Button>(R.id.btn_go_to_register)
 
         val authApi = ApiClient.retrofit.create(AuthApi::class.java)
 
@@ -59,6 +60,10 @@ class LoginActivity : AppCompatActivity() {
                     Toast.makeText(this@LoginActivity, "Network error: ${t.message}", Toast.LENGTH_SHORT).show()
                 }
             })
+        }
+
+        btnGoToRegister.setOnClickListener {
+            startActivity(Intent(this, RegisterActivity::class.java))
         }
     }
 }
