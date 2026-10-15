@@ -1,16 +1,6 @@
-<manifest package="com.hervoice.app"
-    xmlns:android="http://schemas.android.com/apk/res/android">
-
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET" />
-
-    <application
-        android:label="HERVOICE"
-        android:theme="@style/Theme.HerVoice"
-        android:usesCleartextTraffic="true">
-        <activity android:name=".RegisterActivity" android:exported="false" />
-        <activity android:name=".LoginActivity" android:exported="false" />
-        <activity android:name=".ReportActivity" android:exported="false" />
-        <activity android:name=".EvidenceVaultActivity" android:exported="false" />
+    <application android:allowBackup="false" android:label="HERVOICE" android:theme="@style/Theme.HerVoice">
         <activity android:name=".MainActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -18,5 +8,4 @@
             </intent-filter>
         </activity>
     </application>
-
 </manifest>

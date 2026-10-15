@@ -1,38 +1,34 @@
-# Android/IntelliJ
-.gradle/
-**/local.properties
-.idea/
-*.iml
-build/
-captures/
-
-# VS Code (keep shared tasks, ignore personal settings)
-.vscode/settings.json
-*.code-workspace
-
-# macOS
-.DS_Store
-
 # Python
 __pycache__/
-*.pyc
+*.py[cod]
+.venv/
+.env
 
 # Node
 node_modules/
 dist/
 
-# HERVOICE backend runtime data (user accounts, reports, evidence) - never commit
+# Local tooling
+.DS_Store
+
+# Android local caches, SDK path and generated builds
+.gradle/
+.kotlin/
+local.properties
+mobile/**/build/
+
+# Flutter and local test caches
+.dart_tool/
+.flutter-plugins-dependencies
+flutter_app/build/
+.pytest_cache/
+
+# IDE state and generated previews
+.idea/
+.widget_preview/
+**/build/
 backend/data/
 backend/uploads/
-*.log
 
-# Flutter
-mobile_flutter/.dart_tool/
-mobile_flutter/.flutter-plugins
-mobile_flutter/.flutter-plugins-dependencies
-mobile_flutter/build/
-mobile_flutter/.idea/
-
-# Keystore
-*.jks
-*.keystore
+# Isolated local prototype database
+.prototype/
