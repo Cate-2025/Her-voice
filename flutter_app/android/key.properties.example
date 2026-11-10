@@ -1,0 +1,5 @@
+# Copy to key.properties; use an absolute store path outside the repository.
+storeFile=/secure/path/hervoice-release.jks
+storePassword=replace-locally
+keyAlias=hervoice
+keyPassword=replace-locally

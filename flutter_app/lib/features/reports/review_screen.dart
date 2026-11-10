@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/theme.dart';
 import '../../core/components.dart';
-import '../../core/demo_store.dart';
+import '../../core/report_store.dart';
 
 class ReviewScreen extends StatefulWidget {
   const ReviewScreen({super.key, required this.store});
@@ -37,10 +37,12 @@ class _ReviewScreenState extends State<ReviewScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const PageHeading(
+        PageHeading(
           eyebrow: 'ONE LAST LOOK',
           title: 'Make sure it feels right.',
-          subtitle: 'Review your words and details. You can still go back and make changes.',
+          subtitle: widget.store.submissionPending
+              ? 'Your original details are kept unchanged. Retry the saved submission to check its result.'
+              : 'Review your words and details before you choose to submit.',
         ),
         PaperCard(
           child: Column(
@@ -49,7 +51,9 @@ class _ReviewScreenState extends State<ReviewScreen> {
               SectionTitle(
                 'Your incident',
                 trailing: TextButton(
-                  onPressed: _busy ? null : () => context.go('/document'),
+                  onPressed: _busy || widget.store.submissionPending
+                      ? null
+                      : () => context.go('/document'),
                   child: const Text('Edit'),
                 ),
               ),
@@ -102,7 +106,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
           ),
         ),
         const SizedBox(height: 18),
-        const PaperCard(
+        PaperCard(
           color: VoiceColors.sage,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -121,7 +125,9 @@ class _ReviewScreenState extends State<ReviewScreen> {
               ),
               SizedBox(height: 12),
               Text(
-                'In the connected app, submitting will share your report with authorised university personnel. A report records your account of an incident; it is not a finding of misconduct.',
+                widget.store.isConnected
+                    ? 'Submitting shares this report with authorised university personnel. A report records your account of an incident; it is not a finding of misconduct.'
+                    : 'This is a fictional preview. No report or file will be sent.',
                 style: TextStyle(fontSize: 12, height: 1.8),
               ),
             ],
@@ -144,17 +150,29 @@ class _ReviewScreenState extends State<ReviewScreen> {
               : (v) => setState(() => _confirmed = v ?? false),
           title: Text(
             widget.store.isConnected
-                ? 'I agree to send this report to the prototype server for authorised officer review. This is not anonymous reporting.'
+                ? 'I agree to send this report for officer review. My account email is hidden from officers. Authorised administrators can access it with a recorded reason. Report details, filenames and file metadata may still identify me.'
                 : 'I understand this is a fictional preview. No report or file will be sent.',
             style: TextStyle(fontSize: 12),
           ),
         ),
-        if (_error != null) Text(_error!, key: const Key('submission-error')),
+        if (_error != null)
+          Semantics(
+            liveRegion: true,
+            child: Text(_error!, key: const Key('submission-error')),
+          ),
         if (widget.store.submissionPending)
           const Text(
             'Submission started. Retry with the same details to recover the result; editing is locked until it completes.',
           ),
         const SizedBox(height: 18),
+        if (_busy)
+          ListenableBuilder(
+            listenable: widget.store,
+            builder: (context, _) => Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Text(widget.store.submissionProgress),
+            ),
+          ),
         Wrap(
           spacing: 12,
           runSpacing: 12,
@@ -230,8 +248,10 @@ class ConfirmationScreen extends StatelessWidget {
     super.key,
     required this.id,
     this.connected = false,
+    this.caseTitle,
   });
   final bool connected;
+  final String? caseTitle;
   final String id;
   @override
   Widget build(BuildContext context) => Padding(
@@ -260,14 +280,14 @@ class ConfirmationScreen extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             connected
-                ? 'The prototype server received your report. You can follow its status in My records.'
+                ? 'Your report has been submitted. Follow its progress in My records.'
                 : 'Your fictional report now appears in My records.\nNothing was sent to the university.',
             textAlign: TextAlign.center,
             style: TextStyle(color: VoiceColors.muted, height: 1.8),
           ),
           const SizedBox(height: 24),
           Text(
-            id,
+            caseTitle ?? 'Your report',
             style: const TextStyle(
               letterSpacing: 1,
               fontWeight: FontWeight.w700,

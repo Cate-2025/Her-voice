@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/theme.dart';
 import '../../core/components.dart';
-import '../../core/demo_store.dart';
+import '../../core/report_store.dart';
 
 class RecordsScreen extends StatelessWidget {
   const RecordsScreen({super.key, required this.store});
@@ -28,11 +28,13 @@ class RecordsScreen extends StatelessWidget {
           ),
         ),
         const SectionTitle('Drafts'),
-        const Padding(
-          padding: EdgeInsets.only(bottom: 16),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 16),
           child: Text(
-            'Not submitted · retained only during this app session',
-            style: TextStyle(color: VoiceColors.muted, fontSize: 11),
+            store.durableDrafts
+                ? 'Drafts and pending submissions are encrypted on this device. Sign in to the same account to continue.'
+                : 'Drafts are kept only while this app session remains open.',
+            style: const TextStyle(color: VoiceColors.muted, fontSize: 13),
           ),
         ),
         if (store.drafts.isEmpty)
@@ -80,7 +82,7 @@ class RecordsScreen extends StatelessWidget {
                                   builder: (context) => AlertDialog(
                                     title: const Text('Delete this draft?'),
                                     content: const Text(
-                                      'This removes it from this app session. You cannot undo this.',
+                                      'This deletes the draft and its saved evidence from this device. You cannot undo this.',
                                     ),
                                     actions: [
                                       TextButton(
@@ -122,9 +124,15 @@ class RecordsScreen extends StatelessWidget {
                   TextButton.icon(
                     onPressed: () {
                       store.openDraft(draft.id);
-                      context.go('/document');
+                      context.go(
+                        store.draftPending(draft.id) ? '/review' : '/document',
+                      );
                     },
-                    label: const Text('Continue draft'),
+                    label: Text(
+                      store.draftPending(draft.id)
+                          ? 'Review saved submission'
+                          : 'Continue draft',
+                    ),
                     icon: const Icon(Icons.arrow_forward_rounded, size: 16),
                     iconAlignment: IconAlignment.end,
                   ),
@@ -152,7 +160,7 @@ class RecordsScreen extends StatelessWidget {
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         Text(
-                          item.id,
+                          item.title,
                           style: const TextStyle(fontWeight: FontWeight.w800),
                         ),
                         StatusPill(item.status),
@@ -160,7 +168,7 @@ class RecordsScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      '${store.isConnected ? 'Submitted' : 'Fictional case'} · ${shortDate(item.date)}',
+                      '${item.submittedLabel}${store.isConnected ? '' : ' · Fictional case'}',
                       style: const TextStyle(
                         color: VoiceColors.muted,
                         fontSize: 11,
@@ -233,10 +241,20 @@ class CaseDetailScreen extends StatelessWidget {
         const SizedBox(height: 18),
         PageHeading(
           eyebrow: store.isConnected ? 'SUBMITTED CASE' : 'FICTIONAL CASE',
-          title: item.id,
-          subtitle: 'Documented ${shortDate(item.date)}',
+          title: item.title,
+          subtitle: item.submittedLabel,
         ),
         StatusPill(item.status),
+        ExpansionTile(
+          tilePadding: EdgeInsets.zero,
+          title: const Text('Case reference', style: TextStyle(fontSize: 12)),
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: SelectableText(item.id),
+            ),
+          ],
+        ),
         const SizedBox(height: 26),
         PaperCard(
           child: Column(
@@ -336,15 +354,22 @@ class CaseDetailScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SectionTitle('Selected evidence'),
+                SectionTitle(
+                  store.isConnected ? 'Report evidence' : 'Selected evidence',
+                ),
                 for (final file in item.attachments)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 12),
                     child: Text('${file.name} · ${file.sizeLabel}'),
                   ),
-                const Text(
-                  'Preview metadata only. No files were uploaded.',
-                  style: TextStyle(fontSize: 11, color: VoiceColors.muted),
+                Text(
+                  store.isConnected
+                      ? 'These are the evidence files listed on your submitted report.'
+                      : 'Preview metadata only. No files were uploaded.',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: VoiceColors.muted,
+                  ),
                 ),
               ],
             ),

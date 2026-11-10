@@ -3,11 +3,18 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/theme.dart';
 import '../../core/components.dart';
-import '../../core/demo_store.dart';
+import '../../core/report_store.dart';
 
 class WelcomeScreen extends StatelessWidget {
-  const WelcomeScreen({super.key, required this.store});
+  const WelcomeScreen({super.key, required this.store, this.onComplete});
   final ReportStore store;
+  final Future<void> Function()? onComplete;
+
+  Future<void> _continue(BuildContext context, String route) async {
+    await onComplete?.call();
+    if (context.mounted) context.go(route);
+  }
+
   @override
   Widget build(BuildContext context) => Scaffold(
     body: SafeArea(
@@ -57,16 +64,14 @@ class WelcomeScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 28),
                   FilledButton(
-                    onPressed: () => context.go('/home'),
+                    onPressed: () => _continue(context, '/home'),
                     child: Text(
-                      store.isConnected
-                          ? 'Sign in to the prototype'
-                          : 'Explore the preview',
+                      store.isConnected ? 'Get started' : 'Explore the preview',
                     ),
                   ),
                   const SizedBox(height: 12),
                   TextButton(
-                    onPressed: () => context.go('/signin'),
+                    onPressed: () => _continue(context, '/signin'),
                     child: Text(
                       store.isConnected
                           ? 'Sign in'
@@ -76,7 +81,7 @@ class WelcomeScreen extends StatelessWidget {
                   const SizedBox(height: 24),
                   Text(
                     store.isConnected
-                        ? 'Connected prototype · use fictional incident details for testing'
+                        ? 'Your voice matters. Share at your own pace.'
                         : 'Design preview · fictional data · nothing is sent',
                     style: TextStyle(fontSize: 11, color: VoiceColors.muted),
                   ),
@@ -111,8 +116,11 @@ class _SignInScreenState extends State<SignInScreen> {
       _error = null;
     });
     try {
+      final openUpdates = widget.store.notificationOpened;
       await widget.store.login(_email, _password);
-      if (mounted && widget.store.authenticated) context.go('/home');
+      if (mounted && widget.store.authenticated) {
+        context.go(openUpdates ? '/updates' : '/home');
+      }
     } catch (e) {
       if (mounted) setState(() => _error = e.toString());
     } finally {
@@ -145,35 +153,29 @@ class _SignInScreenState extends State<SignInScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'University email',
-                            style: TextStyle(fontWeight: FontWeight.w700),
-                          ),
-                          const SizedBox(height: 10),
                           TextFormField(
                             onChanged: (value) => _email = value,
                             enabled: !_busy,
                             keyboardType: TextInputType.emailAddress,
+                            autofillHints: const [AutofillHints.email],
                             decoration: const InputDecoration(
-                              hintText: 'student@example.test',
+                              labelText: 'Email',
+                              hintText: 'Your account email',
                             ),
                             validator: (v) => v != null && v.contains('@')
                                 ? null
                                 : 'Enter an email address.',
                           ),
                           const SizedBox(height: 24),
-                          const Text(
-                            'Password',
-                            style: TextStyle(fontWeight: FontWeight.w700),
-                          ),
-                          const SizedBox(height: 10),
                           TextFormField(
                             onChanged: (value) => _password = value,
                             enabled: !_busy,
                             obscureText: _hide,
+                            autofillHints: const [AutofillHints.password],
                             enableSuggestions: false,
                             autocorrect: false,
                             decoration: InputDecoration(
+                              labelText: 'Password',
                               hintText: 'Account password',
                               suffixIcon: IconButton(
                                 tooltip: _hide
@@ -210,11 +212,32 @@ class _SignInScreenState extends State<SignInScreen> {
                     ),
                   ),
                   const SizedBox(height: 20),
+                  if (widget.store.isConnected)
+                    Wrap(
+                      spacing: 12,
+                      children: [
+                        TextButton(
+                          onPressed: _busy
+                              ? null
+                              : () => context.go('/register'),
+                          child: const Text('Create an account'),
+                        ),
+                        TextButton(
+                          onPressed: _busy
+                              ? null
+                              : () => context.go('/recover'),
+                          child: const Text('Forgot password?'),
+                        ),
+                      ],
+                    ),
                   if (_error != null)
-                    Text(_error!, key: const Key('signin-error')),
+                    Semantics(
+                      liveRegion: true,
+                      child: Text(_error!, key: const Key('signin-error')),
+                    ),
                   Text(
                     widget.store.isConnected
-                        ? 'Use your seeded student account. Reports are sent to the configured prototype server; use fictional details only.'
+                        ? 'Sign in to your account, or create an account with your email address.'
                         : 'Use fictional credentials. Authentication is simulated in this preview.',
                     style: TextStyle(color: VoiceColors.muted, fontSize: 11),
                   ),

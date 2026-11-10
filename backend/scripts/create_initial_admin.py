@@ -8,7 +8,7 @@ import sys
 from dotenv import dotenv_values
 
 
-def main():
+def prepare_database_environment():
     root = Path(__file__).resolve().parents[1]
     values = {**dotenv_values(root / '.env'), **dotenv_values(root / '.env.local')}
     url = (os.environ.get('DATABASE_URL_UNPOOLED') or os.environ.get('DATABASE_URL')
@@ -23,6 +23,11 @@ def main():
         OBJECT_STORAGE_ACCESS_KEY='unused-admin-bootstrap',
         OBJECT_STORAGE_SECRET_KEY='unused-admin-bootstrap', PUSH_ENABLED='false')
     os.chdir(root)
+    return root
+
+
+def main():
+    prepare_database_environment()
     try:
         from sqlalchemy import create_engine, text
         from app.config import settings

@@ -34,16 +34,29 @@ The backend is published on GitHub branch `deploy/render-free-20261110`.
 Local `main` and its uncommitted app work were not switched or reset.
 The release was checked with 76 isolated backend regression tests.
 
-Render workspace: Omusheshe's workspace. API-based creation of a Frankfurt
-Free Docker web service returned HTTP 402 requiring payment information;
-no Render service was created by that request. The owner declined adding payment
-information and is checking the Dashboard Free flow. Do not retry API creation or
-choose a paid plan without new instructions.
+Render workspace: Omusheshe's workspace. API-based creation initially returned
+HTTP 402 requiring payment information; the owner declined adding it and created
+the Free service through the Dashboard instead. Do not create a duplicate service
+or select a paid plan.
+
+**Live API:** https://her-voice-e2mu.onrender.com/api/v1  
+**Staff dashboard:** https://her-voice-e2mu.onrender.com/admin/  
+**Render service:** `srv-dbphk63ncjis738ua4fg` (Her-voice), Frankfurt, Free.
+
+Deployment `dep-dbphl9rrjlhs73fv4lu0` of commit `e879424` is live.
+Private database/storage settings and the stable JWT secret were merged into the
+service environment after its initial missing-settings startup failure. No secrets
+were committed. Public HTTPS checks returned 200 from `/health`, `/ready`
+(database/schema plus private bucket), and `/admin/` on 10 November 2026.
+This proves hosted API readiness; it does not certify user sign-in, all device
+flows, recovery backups or mail delivery. The Android source default and local Android Studio profile now target the hosted
+API URL. The hosted debug APK was built, installed in place on TECNO CK6 and launched;
+its checksum is recorded in Release checklist. Hosted student sign-in remains
+unverified and requires a student account; mail setup is still pending.
 
 Dashboard settings: repo `Cate-2025/Her-voice`, branch above, runtime Docker,
 Dockerfile `backend/Dockerfile`, build context `backend`, root directory blank,
-command `python -m scripts.run_render`, Frankfurt, Free. Once created, privately
-supply both Neon database URLs, a stable generated JWT secret, storage credentials,
+command `python -m scripts.run_render`, Frankfurt, Free. The service is now configured privately with both Neon database URLs, a stable generated JWT secret, storage credentials,
 actual HTTPS CORS origin, `APP_ENV=staging`, `EMAIL_DELIVERY=disabled`, and
 `PUSH_ENABLED=false`. Never copy these secret values into Git or chat.
 
@@ -71,7 +84,7 @@ alone is not acceptance. Render filesystem storage is not used for evidence.
 
 The previously discussed free managed stack was Render/Neon/R2; an alternative was Oracle's free VM route. Prices, availability and current quotas must be checked when signing up. No provider has been selected/configured by this guide.
 
-**Free-host checkpoint:** check sleep/wake delays, outbound mail restrictions and database compute quotas before choosing. Current app requests time out after 20 seconds; push polls the database every five seconds when enabled; the supplied VM health check queries readiness every 30 seconds. Those behaviours require review for sleeping/free services. The backend currently supports SMTP mail, not an HTTPS email-provider API. A provider that requires an email API needs an implementation change first.
+**Free-host checkpoint:** check sleep/wake delays, outbound mail restrictions and database compute quotas before choosing. Current app requests time out after 20 seconds; push polls the database every five seconds when enabled; the supplied VM health check queries readiness every 30 seconds. Those behaviours require review for sleeping/free services. The backend supports SMTP and Gmail API over HTTPS. Render Free needs the HTTPS option for Gmail; do not use blocked SMTP ports.
 
 **Expected result:** you have one chosen route and know whether its limitations require code/configuration changes. Do not buy several hosts or deploy both routes.
 
@@ -353,6 +366,51 @@ Rate limits currently use the connection source address and per-email resend int
 
 Passwords and sign-in tokens are not stored for offline login. A password reset does not delete a user's encrypted local drafts; the same verified account ID can recover them after successful sign-in on the original device.
 
+### Gmail API on Render Free
+
+SMTP ports 25/465/587 are blocked on Render Free. The backend now supports
+`EMAIL_DELIVERY=gmail_api` over HTTPS, using only the `gmail.send` scope.
+Support is implemented/tested; delivery stays **disabled** until a real sender is
+authorized and an inbox test succeeds.
+
+1. In Google Cloud Console, create/select a HERVOICE project and enable Gmail API.
+2. Configure Google Auth Platform branding/audience. For a personal Gmail sender,
+   use External; while Testing, add that sending address as a test user.
+3. Create an OAuth client of type Desktop app and download its JSON privately.
+4. From `backend/`, install `requirements-dev.txt`, then run:
+
+```bash
+.venv/bin/python -m scripts.authorize_gmail --client-secrets /PRIVATE/PATH/client.json --sender YOUR_GMAIL_ADDRESS
+```
+
+The command opens browser consent using loopback and PKCE. The owner chooses the
+sending account and authorizes send-only access. No email is sent by that command.
+The refresh token/client settings are saved owner-only in
+`backend/.secrets/gmail-sender.json`; never print or commit this file. Use
+`--replace` only when renewing an existing authorization. No Google password or
+app password goes into HERVOICE.
+
+5. Privately configure Render with `GMAIL_SENDER`, `GMAIL_CLIENT_ID`,
+   `GMAIL_CLIENT_SECRET`, `GMAIL_REFRESH_TOKEN` and `EMAIL_DELIVERY=gmail_api`.
+   Merge these keys without replacing database/storage/JWT values, then verify
+   the deployment and actual registration/reset delivery to controlled inboxes.
+
+The runtime caches short-lived access tokens in memory, refreshes using the
+stored grant, bounds token refresh to five seconds and send to ten seconds,
+and hides provider exceptions. It does not fall back to SMTP or file mail.
+Existing challenge expiry, throttles, role restrictions and reset revocation stay
+in force. SMTP remains supported as an alternative provider.
+
+For an External OAuth app in Testing, refresh tokens with Gmail scope normally
+expire after seven days; reauthorize or complete the appropriate Google publishing
+process before relying on longer availability. Sender password changes or consent
+revocation may also require reauthorization. Send success is provider acceptance,
+not proof of inbox receipt. This sender grant is separate from student login.
+
+References: [Gmail sending](https://developers.google.com/workspace/gmail/api/guides/sending),
+[Desktop authorization](https://developers.google.com/identity/protocols/oauth2/native-app),
+[token expiration](https://developers.google.com/identity/protocols/oauth2#expiration).
+
 ## Android push configuration
 
 The code is implemented, but live Firebase delivery has **not** been verified: no HERVOICE Firebase project or credentials were available for this pass. Without project configuration the app still builds, sign-in and in-app updates still work, and Updates explains that phone notifications need setup.
@@ -463,3 +521,18 @@ Neon table preparation completed: schema revision `0004`.
 The migration-test branch `hervoice-migration-check-20261110-101836` expires after 24 hours.
 Certificate verification for its connection required an explicit local CA bundle
 (`/etc/ssl/certs/ca-certificates.crt`). No running API was restarted or switched.
+
+
+## Android endpoint update
+
+The current app defaults to `https://her-voice-e2mu.onrender.com/api/v1`;
+an explicit `HERVOICE_API_BASE_URL` still overrides it for local development.
+Only the public API URL is compiled into Android. Database and bucket credentials
+remain server-side. A same-signature APK update preserves local files, but drafts
+are scoped to API URL and account ID: local-prototype drafts do not automatically
+become hosted-account drafts. Do not clear app data to switch environments.
+
+Render Free can need about a minute to wake after idle. A first sign-in request
+may hit the existing client timeout; allow the host to wake, then retry. Mail and
+Firebase remain disabled; hosted student registration/reset delivery and phone
+push are unavailable until their providers are configured.

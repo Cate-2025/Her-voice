@@ -100,9 +100,10 @@ A working localhost installation does not establish independent hosted operation
 The subsequent Neon integration pass recorded 75 backend tests passed on isolated
 temporary PostgreSQL. Neon database settings were linked and verified read-only;
 the application schema was subsequently tested on an isolated branch and migrated
-to production. The complete hosted API service is still not deployed.
+to production. The Render API service is now live at https://her-voice-e2mu.onrender.com;
+HTTPS health, dependency/schema readiness and the staff dashboard returned 200.
 Private Neon evidence storage has now passed synthetic upload/download/deletion
-and anonymous-access checks. No hosted API deployment, real SMTP/Firebase acceptance, signed hosted upgrade,
+and anonymous-access checks. Real SMTP/Firebase acceptance, signed hosted upgrade,
 full physical-device accessibility pass or restore exercise is established by
 these records. Complete [Release checklist](RELEASE_CHECKLIST.md) for the actual
 hosted build before expanding use. Real-report use also requires the relevant

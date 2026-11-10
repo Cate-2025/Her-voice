@@ -14,7 +14,11 @@ class Settings(BaseSettings):
     database_connect_timeout: int = Field(5, ge=1, le=30)
     database_statement_timeout_ms: int = Field(15000, ge=1000, le=60000)
     push_enabled: bool = False
-    email_delivery: Literal['disabled', 'file', 'smtp'] = 'disabled'
+    email_delivery: Literal['disabled', 'file', 'smtp', 'gmail_api'] = 'disabled'
+    gmail_sender: str = ''
+    gmail_client_id: str = ''
+    gmail_client_secret: str = ''
+    gmail_refresh_token: str = ''
     email_preview_path: str = '.prototype/mail'
     smtp_host: str = ''
     smtp_port: int = 587
@@ -71,8 +75,11 @@ class Settings(BaseSettings):
                 (self.object_storage_access_key, self.object_storage_secret_key)):
             raise ValueError('HTTPS evidence storage and non-placeholder credentials are required')
         staging_without_mail = self.app_env == 'staging' and self.email_delivery == 'disabled'
-        if not staging_without_mail and (self.email_delivery != 'smtp' or not self.smtp_host or not self.smtp_from):
-            raise ValueError('Hosted environments require configured SMTP delivery')
+        smtp_ready = self.email_delivery == 'smtp' and self.smtp_host and self.smtp_from
+        gmail_ready = self.email_delivery == 'gmail_api' and all((self.gmail_sender,
+            self.gmail_client_id, self.gmail_client_secret, self.gmail_refresh_token))
+        if not (staging_without_mail or smtp_ready or gmail_ready):
+            raise ValueError('Hosted environments require configured email delivery')
         def valid_origin(origin):
             parsed = urlsplit(origin)
             return (parsed.scheme == 'https' and bool(parsed.hostname) and not parsed.username

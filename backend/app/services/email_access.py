@@ -38,7 +38,8 @@ def throttle(db, request, action, limit=20):
 def send_code(email, code, purpose):
     message = EmailMessage()
     message['Subject'] = 'HERVOICE email verification' if purpose == 'register' else 'HERVOICE password reset'
-    message['From'] = settings.smtp_from or 'prototype@example.test'
+    message['From'] = (settings.gmail_sender if settings.email_delivery == 'gmail_api'
+                       else settings.smtp_from or 'prototype@example.test')
     message['To'] = email
     message.set_content(f'Your HERVOICE code is {code}. It expires in 15 minutes.\n\nIf you did not request this, ignore this email. Do not share this code.\n')
     if settings.email_delivery == 'file' and settings.app_env == 'development':
@@ -47,6 +48,10 @@ def send_code(email, code, purpose):
         path = folder / f'{secrets.token_hex(16)}.eml'
         fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
         with os.fdopen(fd, 'w') as file: file.write(message.as_string())
+        return
+    if settings.email_delivery == 'gmail_api':
+        from app.services.gmail_delivery import send_message
+        send_message(message)
         return
     if settings.email_delivery != 'smtp' or not settings.smtp_host or not settings.smtp_from:
         raise RuntimeError('Email delivery not configured')

@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../core/demo_store.dart';
 import '../features/auth/welcome_screen.dart';
+import '../features/auth/email_access_screen.dart';
 import '../features/home/home_screen.dart';
 import '../features/records/records_screen.dart';
 import '../features/reports/editor_screen.dart';
@@ -13,9 +14,15 @@ import 'shell.dart';
 import 'theme.dart';
 
 class HerVoiceApp extends StatefulWidget {
-  const HerVoiceApp({super.key, this.store, this.initialLocation = '/home'});
+  const HerVoiceApp({
+    super.key,
+    this.store,
+    this.initialLocation = '/home',
+    this.onWelcomeComplete,
+  });
   final ReportStore? store;
   final String initialLocation;
+  final Future<void> Function()? onWelcomeComplete;
   @override
   State<HerVoiceApp> createState() => _HerVoiceAppState();
 }
@@ -29,17 +36,32 @@ class _HerVoiceAppState extends State<HerVoiceApp> {
       final public = [
         '/welcome',
         '/signin',
+        '/register',
+        '/recover',
         '/support',
       ].contains(state.uri.path);
       if (_store.isConnected && !_store.authenticated && !public) {
         return '/signin';
       }
+      if (_store.notificationOpened && _store.authenticated) {
+        _store.notificationOpened = false;
+        return '/updates';
+      }
       return null;
     },
     routes: [
       GoRoute(
+        path: '/register',
+        builder: (_, _) => EmailAccessScreen(store: _store, reset: false),
+      ),
+      GoRoute(
+        path: '/recover',
+        builder: (_, _) => EmailAccessScreen(store: _store, reset: true),
+      ),
+      GoRoute(
         path: '/welcome',
-        builder: (_, _) => WelcomeScreen(store: _store),
+        builder: (_, _) =>
+            WelcomeScreen(store: _store, onComplete: widget.onWelcomeComplete),
       ),
       GoRoute(
         path: '/signin',
@@ -85,6 +107,9 @@ class _HerVoiceAppState extends State<HerVoiceApp> {
                     id: state.pathParameters['id']!,
                   )
                 : ConfirmationScreen(
+                    caseTitle: _store
+                        .caseById(state.pathParameters['id']!)!
+                        .title,
                     connected: _store.isConnected,
                     id: state.pathParameters['id']!,
                   ),
@@ -110,9 +135,7 @@ class _HerVoiceAppState extends State<HerVoiceApp> {
 
   @override
   Widget build(BuildContext context) => MaterialApp.router(
-    title: _store.isConnected
-        ? 'HERVOICE · Prototype'
-        : 'HERVOICE · Design preview',
+    title: _store.isConnected ? 'HERVOICE' : 'HERVOICE · Design preview',
     debugShowCheckedModeBanner: false,
     theme: voiceTheme(),
     routerConfig: _router,

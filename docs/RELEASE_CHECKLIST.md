@@ -59,3 +59,40 @@ test skipped, static analysis clean, debug APK build/install and a successful
 phone-to-local-API readiness check. These results do not fill the hosted/provider,
 accessibility or operational rows above. See [Description](DESCRIPTION.md#verification-and-deployment-position)
 for the dated scope. No new application tests were run for the documentation move.
+
+
+## Hosted API check — 10 November 2026
+
+Render Free service Her-voice is live at https://her-voice-e2mu.onrender.com,
+revision `e879424`, deployment `dep-dbphl9rrjlhs73fv4lu0`.
+Public `/health`, `/ready` and `/admin/` returned HTTP 200 after private
+Neon/database/JWT/bucket settings were applied. The private bucket separately
+passed synthetic upload/read/delete and rejected anonymous access with 403.
+Mail and push are deliberately disabled. User sign-in and the complete hosted
+student/officer journey, independent phone build, signed upgrades and operational
+restore checks remain to execute; no credentials were used to sign in for this pass.
+
+
+## Hosted Android build — 10 November 2026
+
+Built with `HERVOICE_API_BASE_URL=https://her-voice-e2mu.onrender.com/api/v1`.
+Flutter static analysis: no issues. Debug APK compiled; hosted URL verified in
+its compiled kernel. Installed using `adb install -r` on TECNO CK6 and launched;
+no uninstall/data clear. Copied to `/home/emmaa/Desktop/HERVOICE-hosted-debug.apk`.
+SHA-256: `e60c695c32906047551ea40e5198b67dfb8a3aeb29d2ac4f6e8dea0ffbfe8055`.
+
+The Android Studio profile and app default both use the hosted URL; explicit
+Dart defines still permit local testing. Drafts from the local account/API scope
+remain separate. No hosted student sign-in/submission was performed. Neon admin
+credentials belong to the web dashboard, not the student-only Android sign-in.
+Registration/reset delivery remains unavailable until mail is configured.
+
+
+## Hosted operator journey — owner-run verification
+
+The owner ran `scripts.provision_test_accounts` through private terminal prompts
+and reported successful creation of student/officer test accounts, hosted sign-in,
+evidence integrity, officer identity omission, status progression and read-all.
+Retained fictional report: `64d291c6-07b9-429c-8a40-7068bcb5c054`.
+This is owner-reported operator-script evidence, not a completed phone UI or
+accessibility acceptance pass. No passwords or tokens were shared in chat.

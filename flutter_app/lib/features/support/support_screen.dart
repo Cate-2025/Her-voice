@@ -44,19 +44,19 @@ class SupportScreen extends StatelessWidget {
           Icons.chat_bubble_outline,
           'Talk to a counsellor',
           'A space to talk and get emotional support.',
-          'Ask your university counselling service about appointments, availability, and how they handle confidentiality before sharing details.',
+          'Makerere Counselling and Guidance Centre is opposite Mary Stuart Hall. Call +256 772 558022 or +256 702 558022 to ask about appointments and confidentiality.',
         ),
         (
           Icons.school_outlined,
           'Understand the university process',
           'Learn what reporting and case review involve.',
-          'A university support office can explain reporting options, who will handle a report, and what to expect. You can ask questions before deciding whether to submit.',
+          'Makerere accepts informal and formal complaints. A formal complaint is written and signed, with your contact details, the complaint date and incident details. Complaints go through the Gender Mainstreaming Directorate for investigation and referral to the appropriate disciplinary body. Ask the Directorate how to begin.',
         ),
         (
           Icons.people_outline,
           'Bring someone with you',
           'You can ask for support at appointments.',
-          'Consider asking someone you trust to accompany you or help prepare questions. Check with the service about its appointment arrangements.',
+          'Makerere’s policy allows a friend or colleague to accompany you to a hearing. Ask the office about support at other appointments.',
         ),
       ])
         Padding(
@@ -97,22 +97,63 @@ class SupportScreen extends StatelessWidget {
           ),
         ),
       const SizedBox(height: 14),
-      const PaperCard(
-        color: VoiceColors.peach,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'University contacts',
-              style: TextStyle(fontWeight: FontWeight.w800),
-            ),
-            SizedBox(height: 10),
-            Text(
-              'Confirmed contact details will appear here. This preview does not list unverified phone numbers or availability.',
-              style: TextStyle(fontSize: 12, height: 1.8),
-            ),
-          ],
+      const SectionTitle('Makerere support contacts'),
+      for (final contact in const [
+        (
+          'Counselling and Guidance Centre',
+          '+256 772 558022 · +256 702 558022\nOpposite Mary Stuart Hall. Ask about appointments and confidentiality.',
         ),
+        (
+          'Gender Mainstreaming Directorate',
+          'Safeguarding hotline: +256 755 797130\nFor advice about sexual harassment and reporting options.',
+        ),
+        (
+          'Safeguarding and Inclusivity',
+          'safeguardingliaison@mak.ac.ug\nMakerere’s official online reporting service: https://safespace.mak.ac.ug/',
+        ),
+        (
+          'Dean of Students',
+          'Senate Building, Room 208. You can ask about student support and reporting options.',
+        ),
+        (
+          'Health and urgent assistance',
+          'University Hospital: opposite the Main Gate.\nMakerere University Police: +256 782 151656, near the Eastern Gate.\nUganda Police: 999 or 112 on mobile.',
+        ),
+      ])
+        Padding(
+          padding: const EdgeInsets.only(bottom: 22),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                contact.$1,
+                style: const TextStyle(fontWeight: FontWeight.w800),
+              ),
+              const SizedBox(height: 8),
+              SelectableText(
+                contact.$2,
+                style: const TextStyle(fontSize: 13, height: 1.8),
+              ),
+            ],
+          ),
+        ),
+      const ExpansionTile(
+        tilePadding: EdgeInsets.zero,
+        title: Text('Confidentiality and formal reporting'),
+        children: [
+          Padding(
+            padding: EdgeInsets.only(bottom: 18),
+            child: Text(
+              'MakSafeSpace offers anonymous or confidential reporting. The published sexual-harassment policy requires identity disclosure to the respondent during a formal investigation. Ask the Directorate how this applies before proceeding. HERVOICE does not automatically forward reports to MakSafeSpace.',
+              style: TextStyle(fontSize: 13, height: 1.8),
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 18),
+      const SelectableText(
+        'Contact sources: https://mak.ac.ug/get-touch and Makerere School of Medicine’s safeguarding guidance. Checked 10 November 2026.\nReporting policy: https://policies.mak.ac.ug/policy/policy-regulations-sexual-harassment-prevention',
+        style: TextStyle(color: VoiceColors.muted, fontSize: 12, height: 1.8),
       ),
       const SizedBox(height: 24),
       const Text(

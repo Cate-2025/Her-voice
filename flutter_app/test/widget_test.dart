@@ -100,9 +100,9 @@ void main() {
         'fictional-password',
       );
       await tapVisible(tester, find.text('Sign in'));
-      expect(find.text('Welcome to your space.'), findsOneWidget);
+      expect(find.text('Your dashboard'), findsOneWidget);
       expect(find.text('HV-DEMO-024'), findsNothing);
-      expect(find.text('PROTOTYPE'), findsOneWidget);
+      expect(find.text('PROTOTYPE'), findsNothing);
     },
   );
 

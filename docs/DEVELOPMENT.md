@@ -47,6 +47,11 @@ The process runs in the foreground and is not an independently hosted service. C
 
 ## 2. Connect Android Studio
 
+The app default and the current Android Studio `main.dart` profile now target
+`https://her-voice-e2mu.onrender.com/api/v1`. Hosted runs need neither a running
+laptop API nor adb port reversal. The commands below are only for deliberately
+switching back to local development. Restore the hosted run argument afterwards.
+
 For the physical phone using wireless debugging, connect/pair through Android Studio first. Then:
 
 ```bash
@@ -56,7 +61,7 @@ For the physical phone using wireless debugging, connect/pair through Android St
 /home/emmaa/Android/Sdk/platform-tools/adb reverse --list
 ```
 
-Keep the Android Studio Flutter run argument:
+For local testing, explicitly set the Android Studio Flutter run argument:
 
 ```text
 --dart-define=HERVOICE_API_BASE_URL=http://127.0.0.1:8000/api/v1
@@ -285,3 +290,28 @@ Legacy submitted cases keep their creation timestamp as the best available submi
 
 
 Detailed endpoints: [API reference](reference/API_CONTRACT.md); generated schema: [OpenAPI](openapi.json).
+
+
+## Closed provisioning of hosted test accounts
+
+After the initial administrator exists, run in your own terminal:
+
+```bash
+cd /home/emmaa/Work/Her-voice/backend
+.venv/bin/python -m scripts.provision_test_accounts
+```
+
+Enter two new valid email addresses/aliases and separate 12–128-character
+passwords through the hidden prompts. Use addresses different from the existing
+administrator. This is operator provisioning for test use, not public staff
+registration, invitation support or a verified-mailbox claim. The command creates
+only student/officer roles, refuses existing addresses and preserves administrators.
+Both new accounts commit together; no credential file is saved.
+
+It then wakes the hosted API and checks sign-in, one explicitly fictional report,
+a fictional evidence upload and matching authorised download, officer identity
+omission, status update and student read-all. The fictional report remains for
+manual review. If account creation succeeds but verification fails, retain your
+credentials and report the outcome rather than rerunning provisioning. Do not
+paste passwords or tokens into chat. These checks do not replace phone UI,
+interrupted-submission or complete cross-account acceptance testing.

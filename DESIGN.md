@@ -285,3 +285,12 @@ Privacy; only actionable storage/API errors appear above content. Manual refresh
 is an account-menu action, with separate inline retry actions for errors.
 Preview mode retains its fictional-data label. Makerere support contacts use
 ordinary divided reading sections and selectable text rather than extra cards.
+
+
+## Welcome entry behavior
+
+The connected Android startup shows Welcome until either entry action is used,
+then starts at Sign in on later launches. A device-level secure-storage preference
+is separate from account draft keys; failure to persist it must not block login
+or reset storage. Existing installations without this marker see Welcome once
+after this update. The screen remains accessible through the account menu.

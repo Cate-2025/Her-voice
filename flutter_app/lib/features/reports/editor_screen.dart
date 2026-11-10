@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/theme.dart';
 import '../../core/components.dart';
-import '../../core/demo_store.dart';
+import '../../core/report_store.dart';
 
 class EditorScreen extends StatefulWidget {
   const EditorScreen({super.key, required this.store});
@@ -76,14 +76,23 @@ class _EditorScreenState extends State<EditorScreen> {
           showNotice(context, 'You can select up to five files.');
           break;
         }
-        draft.attachments.add(Attachment(file.name, bytes));
+        if (widget.store.isConnected) {
+          await widget.store.addAttachment(
+            draft,
+            file.name,
+            await file.readAsBytes(),
+          );
+          if (!mounted) return;
+        } else {
+          draft.attachments.add(Attachment(file.name, bytes));
+        }
       }
       widget.store.changed();
-    } catch (_) {
+    } catch (error) {
       if (mounted) {
         showNotice(
           context,
-          'The file picker could not open. Please try again.',
+          'The file could not be saved. Check device storage and try again.',
         );
       }
     } finally {
@@ -209,9 +218,13 @@ class _EditorScreenState extends State<EditorScreen> {
                       minLines: 5,
                       maxLines: 12,
                       decoration: const InputDecoration(
+                        labelText: 'What happened?',
                         hintText: 'Write what you remember, in your own words…',
                       ),
-                      onChanged: (v) => draft.narrative = v,
+                      onChanged: (v) {
+                        draft.narrative = v;
+                        widget.store.changed();
+                      },
                       validator: (v) => v == null || v.trim().isEmpty
                           ? 'Add a description before reviewing.'
                           : null,
@@ -224,9 +237,13 @@ class _EditorScreenState extends State<EditorScreen> {
                       key: const Key('subject-field'),
                       initialValue: draft.subject,
                       decoration: const InputDecoration(
+                        labelText: 'Person involved',
                         hintText: 'Name or staff reference',
                       ),
-                      onChanged: (v) => draft.subject = v,
+                      onChanged: (v) {
+                        draft.subject = v;
+                        widget.store.changed();
+                      },
                       validator: (v) => v == null || v.trim().length < 2
                           ? 'Add a name or reference.'
                           : null,
@@ -260,9 +277,13 @@ class _EditorScreenState extends State<EditorScreen> {
                     TextFormField(
                       initialValue: draft.location,
                       decoration: const InputDecoration(
+                        labelText: 'Where did it happen? (optional)',
                         hintText: 'A place or setting',
                       ),
-                      onChanged: (v) => draft.location = v,
+                      onChanged: (v) {
+                        draft.location = v;
+                        widget.store.changed();
+                      },
                       maxLength: 255,
                     ),
                   ),
@@ -271,9 +292,13 @@ class _EditorScreenState extends State<EditorScreen> {
                     TextFormField(
                       initialValue: draft.course,
                       decoration: const InputDecoration(
+                        labelText: 'Course or unit (optional)',
                         hintText: 'Course or unit name',
                       ),
-                      onChanged: (v) => draft.course = v,
+                      onChanged: (v) {
+                        draft.course = v;
+                        widget.store.changed();
+                      },
                       maxLength: 128,
                     ),
                   ),
@@ -292,9 +317,9 @@ class _EditorScreenState extends State<EditorScreen> {
                   style: TextStyle(color: VoiceColors.muted),
                 ),
                 const SizedBox(height: 24),
-                if (widget.store.isConnected)
+                if (widget.store.isConnected && !widget.store.durableDrafts)
                   const Text(
-                    'Attachment uploads are not available in this milestone. Continue without files; no evidence will be sent.',
+                    'Secure evidence selection is available on Android. You can still submit without files here.',
                   )
                 else
                   Container(
@@ -361,7 +386,7 @@ class _EditorScreenState extends State<EditorScreen> {
                                 ),
                               ),
                               Text(
-                                '${file.sizeLabel} · Selected for preview',
+                                '${file.sizeLabel} · ${widget.store.isConnected ? 'Saved encrypted' : 'Selected for preview'}',
                                 style: const TextStyle(
                                   fontSize: 10,
                                   color: VoiceColors.muted,
@@ -372,10 +397,24 @@ class _EditorScreenState extends State<EditorScreen> {
                         ),
                         IconButton(
                           tooltip: 'Remove ${file.name}',
-                          onPressed: () {
-                            setState(() => draft.attachments.remove(file));
-                            widget.store.changed();
-                          },
+                          onPressed: _picking
+                              ? null
+                              : () async {
+                                  try {
+                                    await widget.store.removeAttachment(
+                                      draft,
+                                      file,
+                                    );
+                                    if (mounted) setState(() {});
+                                  } catch (_) {
+                                    if (context.mounted) {
+                                      showNotice(
+                                        context,
+                                        'Could not save the change. Retry before leaving.',
+                                      );
+                                    }
+                                  }
+                                },
                           icon: const Icon(Icons.close_rounded, size: 18),
                         ),
                       ],
@@ -397,16 +436,31 @@ class _EditorScreenState extends State<EditorScreen> {
           children: [
             OutlinedButton(
               key: const Key('save-draft'),
-              onPressed: () {
-                widget.store.changed();
-                context.go('/records');
-                showNotice(
-                  context,
-                  widget.store.isConnected
-                      ? 'Draft kept in memory for this session only.'
-                      : 'Draft kept for this preview session.',
-                );
-              },
+              onPressed: _picking
+                  ? null
+                  : () async {
+                      widget.store.changed();
+                      try {
+                        await widget.store.flushDrafts();
+                        if (!context.mounted) return;
+                        showNotice(
+                          context,
+                          widget.store.durableDrafts
+                              ? 'Draft saved encrypted on this device.'
+                              : widget.store.isConnected
+                              ? 'Draft kept for this app session.'
+                              : 'Draft kept for this preview session.',
+                        );
+                        context.go('/records');
+                      } catch (_) {
+                        if (context.mounted) {
+                          showNotice(
+                            context,
+                            'Draft could not be saved. Keep this screen open and retry.',
+                          );
+                        }
+                      }
+                    },
               child: const Text('Save draft & leave'),
             ),
             if (_step == 1)
@@ -436,7 +490,7 @@ class _EditorScreenState extends State<EditorScreen> {
         const SizedBox(height: 18),
         Text(
           widget.store.isConnected
-              ? 'Drafts are in memory only. Nothing is sent until you explicitly submit from review.'
+              ? '${widget.store.draftStorageStatus} Nothing is sent until you explicitly submit from review.'
               : 'Nothing is sent while you explore this preview.',
           style: TextStyle(color: VoiceColors.muted, fontSize: 11),
         ),
@@ -444,18 +498,6 @@ class _EditorScreenState extends State<EditorScreen> {
     );
   }
 
-  Widget _field(String label, Widget field) => Padding(
-    padding: const EdgeInsets.only(bottom: 16),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
-        ),
-        const SizedBox(height: 10),
-        field,
-      ],
-    ),
-  );
+  Widget _field(String label, Widget field) =>
+      Padding(padding: const EdgeInsets.only(bottom: 16), child: field);
 }

@@ -9,6 +9,7 @@ abstract final class VoiceColors {
   static const sage = Color(0xFFE6EDE5);
   static const green = Color(0xFF45674E);
   static const peach = Color(0xFFF3E5D8);
+  static const fieldLine = Color(0xFF8B7C90);
   static const line = Color(0xFFE5DFE5);
 }
 
@@ -20,7 +21,7 @@ ThemeData voiceTheme() {
       primary: VoiceColors.plum,
       surface: VoiceColors.paper,
       onSurface: VoiceColors.ink,
-      outline: VoiceColors.line,
+      outline: VoiceColors.fieldLine,
     ),
     scaffoldBackgroundColor: VoiceColors.paper,
     fontFamily: 'Manrope',
@@ -76,9 +77,15 @@ ThemeData voiceTheme() {
       style: OutlinedButton.styleFrom(
         minimumSize: const Size(48, 50),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-        side: const BorderSide(color: VoiceColors.line),
+        side: const BorderSide(color: VoiceColors.fieldLine),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
+    ),
+    iconButtonTheme: IconButtonThemeData(
+      style: IconButton.styleFrom(minimumSize: const Size(48, 48)),
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
@@ -86,11 +93,11 @@ ThemeData voiceTheme() {
       contentPadding: const EdgeInsets.all(17),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: VoiceColors.line),
+        borderSide: const BorderSide(color: VoiceColors.fieldLine),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: VoiceColors.line),
+        borderSide: const BorderSide(color: VoiceColors.fieldLine),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
