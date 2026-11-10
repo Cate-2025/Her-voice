@@ -28,6 +28,39 @@ Record launch evidence in [Release checklist](RELEASE_CHECKLIST.md).
 
 **The Dockerfile packages the API and admin website. It does not create the database, bucket, mail account or APK.** A successful API build is only one step.
 
+## Current deployment status — Render and Neon
+
+The backend is published on GitHub branch `deploy/render-free-20261110`.
+Local `main` and its uncommitted app work were not switched or reset.
+The release was checked with 76 isolated backend regression tests.
+
+Render workspace: Omusheshe's workspace. API-based creation of a Frankfurt
+Free Docker web service returned HTTP 402 requiring payment information;
+no Render service was created by that request. The owner declined adding payment
+information and is checking the Dashboard Free flow. Do not retry API creation or
+choose a paid plan without new instructions.
+
+Dashboard settings: repo `Cate-2025/Her-voice`, branch above, runtime Docker,
+Dockerfile `backend/Dockerfile`, build context `backend`, root directory blank,
+command `python -m scripts.run_render`, Frankfurt, Free. Once created, privately
+supply both Neon database URLs, a stable generated JWT secret, storage credentials,
+actual HTTPS CORS origin, `APP_ENV=staging`, `EMAIL_DELIVERY=disabled`, and
+`PUSH_ENABLED=false`. Never copy these secret values into Git or chat.
+
+Staging now permits deliberately disabled mail while continuing to reject local
+file delivery; production still requires configured mail. Registration/reset
+cannot deliver codes until mail is configured. No mail provider was configured.
+The Render startup binds `PORT` without migrations or demo seeding and does not
+trust arbitrary forwarded headers. Until reviewed proxy trust is configured,
+source-address throttles can group requests behind the platform proxy.
+
+Neon private bucket `hervoice-evidence` was provisioned in the existing Frankfurt
+project. HeadBucket and synthetic write/read/delete succeeded. S3 uses SigV4,
+path-style addressing and the Neon region. AWS-standard variables in private
+`backend/.env.local` are accepted by the backend, without rewriting secrets into
+source. Readiness still checks database/schema and bucket access; a built container
+alone is not acceptance. Render filesystem storage is not used for evidence.
+
 ## 0. Choose one route
 
 | Route | What to use | Status in this repository |
@@ -115,7 +148,7 @@ protected deployment dotenv; the local file is not copied by the Dockerfile.
 
 **Do:** verify the sender with the provider, including required DNS records. Confirm the API host permits that outbound connection. Use `starttls` or `ssl` as the provider specifies; never work around a port restriction by disabling TLS.
 
-**Expected result:** the provider account/sender is ready. Real verification/reset delivery is tested after API deployment in step 5. With hosted settings, the current API requires configured SMTP even if you initially demonstrate only existing accounts. Local file mail is development-only.
+**Expected result:** the provider account/sender is ready. Real verification/reset delivery is tested after API deployment in step 5. Production requires configured mail. Staging may explicitly use `EMAIL_DELIVERY=disabled` while demonstrating existing accounts; registration/reset cannot deliver codes in that state. Local file mail is development-only.
 
 **Details:** [email details](#email-delivery-details) explains code expiry, reset behaviour and mail limitations.
 
@@ -143,7 +176,7 @@ Source files: `backend/Dockerfile` and `backend/app/`. Set these in the managed 
 | `SMTP_FROM`, `SMTP_USER`, `SMTP_PASSWORD` | Verified sender and service credentials |
 | `PUSH_ENABLED` | `false` until step 6 |
 
-Templates: `backend/.env.example` for host-run Python; `backend/deploy/.env.example` for VM Compose. Templates are not usable credentials. Hosted validation rejects placeholders, local evidence, disabled/file mail and HTTP storage/browser origins. Keep `APP_ENV=staging` and fix the failing setting rather than bypassing validation.
+Templates: `backend/.env.example` for host-run Python; `backend/deploy/.env.example` for VM Compose. Templates are not usable credentials. Hosted validation rejects placeholders, local evidence, file mail and HTTP storage/browser origins. Production also rejects disabled mail; staging can deliberately defer it. Keep `APP_ENV=staging` and fix the failing setting rather than bypassing validation.
 
 Keep secrets outside Git/image contents. Quote dotenv values safely; do not execute a dotenv file with `source`. Process environment settings take precedence over the Python `.env`. Rotating the JWT secret invalidates existing sign-ins and outstanding email codes.
 
