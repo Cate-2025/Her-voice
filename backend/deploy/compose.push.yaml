@@ -1,0 +1,12 @@
+# Add with: -f compose.yaml -f compose.push.yaml
+services:
+  api:
+    environment:
+      PUSH_ENABLED: "true"
+      GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/firebase.json
+    volumes:
+      - type: bind
+        source: ${FIREBASE_CREDENTIALS_PATH:?Set the absolute service credential path}
+        target: /run/secrets/firebase.json
+        read_only: true
+        bind: {create_host_path: false}

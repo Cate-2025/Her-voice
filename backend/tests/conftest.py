@@ -9,7 +9,9 @@ import pytest
 # Settings are imported at module load throughout the existing app.
 _pg = pixeltable_pgserver.get_server(Path(tempfile.mkdtemp(prefix='hervoice-tests-')))
 os.environ.update(
-    DATABASE_URL=_pg.get_uri(driver='psycopg'),
+    DATABASE_URL=_pg.get_uri(driver='psycopg'), PUSH_ENABLED='false',
+    # Never allow a private .env.local direct URL to route test migrations to Neon.
+    DATABASE_URL_UNPOOLED=_pg.get_uri(driver='psycopg'),
     JWT_SECRET='fictional-integration-test-secret-32chars',
     OBJECT_STORAGE_ENDPOINT='http://localhost:9000',
     OBJECT_STORAGE_ACCESS_KEY='fictional', OBJECT_STORAGE_SECRET_KEY='fictional',

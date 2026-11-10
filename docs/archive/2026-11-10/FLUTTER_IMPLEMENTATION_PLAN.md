@@ -1,6 +1,10 @@
+> Archived snapshot, preserved 10 November 2026. Historical instructions and results may be superseded. Use the [current review documents](../../README.md).
+
 # HERVOICE Flutter redesign and implementation plan
 
-Prepared 12 October 2026. Planning baseline: local `backend` branch, commit `162380c`. This document records the original implementation roadmap. Actual completed work is tracked in [IMPLEMENTATION_PROGRESS.md](IMPLEMENTATION_PROGRESS.md); use [API_CONTRACT.md](API_CONTRACT.md) for current endpoint behaviour.
+> Historical planning/review reference. For current deployment steps and expected results, use [Deployment](DEPLOYMENT.md). Older implementation limits below may have been superseded.
+
+Prepared 12 October 2026. Planning baseline: local `backend` branch, commit `162380c`. This document records the original implementation roadmap. Actual completed work is tracked in [IMPLEMENTATION_PROGRESS.md](IMPLEMENTATION_PROGRESS.md); use [API_CONTRACT.md](../../reference/API_CONTRACT.md) for current endpoint behaviour.
 
 ## 1. Delivery goal and assumptions
 

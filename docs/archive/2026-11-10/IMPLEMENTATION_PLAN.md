@@ -1,4 +1,8 @@
+> Archived snapshot, preserved 10 November 2026. Historical instructions and results may be superseded. Use the [current review documents](../../README.md).
+
 # HERVOICE Three Week Implementation Plan
+
+> Historical planning/review reference. For current deployment steps and expected results, use [Deployment](DEPLOYMENT.md). Older implementation limits below may have been superseded.
 
 > Historical Compose plan (18 September 2026). Current Flutter work follows [FLUTTER_IMPLEMENTATION_PLAN.md](FLUTTER_IMPLEMENTATION_PLAN.md) and [IMPLEMENTATION_PROGRESS.md](IMPLEMENTATION_PROGRESS.md). The current API differs from the snapshot below.
 
@@ -29,7 +33,7 @@ The current Android “Submit report” button updates memory only. The current 
 | Android screens, secure local draft, attachment picker, sync, API client | Android collaborator | APK, screen-flow demo, request/response integration feedback |
 | Reporting modes, demo script, fictional data, usability review | Both | Written decisions and one shared integration test |
 
-Use the exact request/response examples in [API_CONTRACT.md](API_CONTRACT.md). Agree on any contract change in the repository before either side builds against it. The dashboard calls the API; it never reads PostgreSQL directly.
+Use the exact request/response examples in [API_CONTRACT.md](../../reference/API_CONTRACT.md). Agree on any contract change in the repository before either side builds against it. The dashboard calls the API; it never reads PostgreSQL directly.
 
 ## Scope decisions to lock before implementation
 

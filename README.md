@@ -2,20 +2,27 @@
 
 Authors: Nawonga Catherine (24/U/09989/PS), Arinda Emmanuel Nsiimenta (24/U/03629/PS)
 
-Project: HERVOICE — A Secure Mobile Platform for Reporting and Coordinating Support for Sexual Harassment in Universities
+HERVOICE is an Android platform for confidential university incident reporting,
+evidence submission and support, with a browser workspace for officers and administrators.
+The active application is `flutter_app/` plus FastAPI `backend/` and PostgreSQL.
 
-The consolidated first prototype uses the redesigned Flutter Android client with FastAPI and PostgreSQL. Start with the [prototype runbook](docs/PROTOTYPE_RUNBOOK.md) and [comparison with the original plan](docs/CONSOLIDATION_REVIEW.md).
+## Review the project
 
-## Supported components
+| Read | Purpose |
+| --- | --- |
+| [Description](docs/DESCRIPTION.md) | What exists, file map, boundaries and current readiness |
+| [Deployment](docs/DEPLOYMENT.md) | Host the API independently, configure services and distribute Android |
+| [Development](docs/DEVELOPMENT.md) | Run locally, connect Android Studio and understand/test the code |
+| [Release checklist](docs/RELEASE_CHECKLIST.md) | Record hosted/device/provider and operational acceptance |
+| [Decisions](docs/DECISIONS.md) | Stakeholder questions and approved v1/pilot scope |
 
-- `flutter_app/`: connected student client; sign-in, incident submission without files, current case status and in-app updates. The earlier fictional UI preview is opt-in.
-- `backend/`: FastAPI, PostgreSQL migrations, role/owner checks, officer web dashboard and backend tests.
-- `mobile/`: legacy Compose screen-flow reference.
-- `legacy/main/`: preserved Node backend, older connected Flutter/Android work and scripts from the other branch. These are historical references, not a second active stack.
-- `docs/`: current runbook, consolidation review, API contract and earlier design plans.
+See the [documentation index](docs/README.md) for technical reference and archive.
 
-## Prototype limits
+The application has local regression/build evidence and is ready to attempt a
+controlled fictional-data hosted demo. Independent deployment/provider acceptance
+and real-report handling approval are separate checks, not established by a
+successful localhost build.
 
-Use fictional data. Authentication and unsubmitted drafts are memory-only on the client; submitted reports persist on the server. Verified evidence upload, encrypted durable offline storage/synchronisation, registration/recovery, anonymous reporting and push/SMS are not complete. The report submission screen explicitly explains access and sends data only after confirmation.
-
-This is the first connected reporting/case-coordination milestone, not completion of the original concept paper. See the requirement-by-requirement comparison and verification results in the linked documents.
+`mobile/` and `legacy/main/` preserve earlier implementations; they are not a
+second active deployment stack. Product and visual-system contracts remain in
+[PRODUCT.md](PRODUCT.md) and [DESIGN.md](DESIGN.md).

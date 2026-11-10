@@ -7,11 +7,13 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.pagination import Page
 from app.database import get_db
 from app.models import CaseStatus, Evidence, Report, ReportMode, Role, TimelineEvent, User
 from app.schemas import ReportCreate, ReportResponse, StudentReportDetail
 from app.security import get_current_user
 from app.services.patterns import evaluate_staff_reference
+from app.services.case_history import status_history
 
 router = APIRouter(prefix="/api/v1", tags=["reports"])
 
@@ -83,6 +85,7 @@ def report_detail(report_id: UUID, user: User = Depends(student_account), db: Se
     report = owned_report(db, report_id, user)
     return {
         **ReportResponse.model_validate(report).model_dump(),
+        "status_history": status_history(db, report),
         "timeline": db.query(TimelineEvent).filter(TimelineEvent.report_id == report.id).order_by(TimelineEvent.occurred_at, TimelineEvent.id).all(),
         "evidence": db.query(Evidence).filter(Evidence.report_id == report.id).order_by(Evidence.id).all(),
     }
@@ -109,8 +112,8 @@ def submit_draft(report_id: UUID, user: User = Depends(student_account), db: Ses
 
 
 @router.get("/cases/mine", response_model=list[ReportResponse])
-def my_cases(user: User = Depends(student_account), db: Session = Depends(get_db)) -> list[Report]:
-    return db.query(Report).filter(Report.reporter_id == user.id, Report.status != CaseStatus.DRAFT).order_by(Report.updated_at.desc(), Report.id).all()
+def my_cases(user: User = Depends(student_account), db: Session = Depends(get_db), page: Page = Depends()) -> list[Report]:
+    return page.apply(db.query(Report).filter(Report.reporter_id == user.id, Report.status != CaseStatus.DRAFT).order_by(Report.updated_at.desc(), Report.id)).all()
 
 
 @router.post("/reports", deprecated=True, status_code=410)

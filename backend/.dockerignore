@@ -1,0 +1,14 @@
+*
+!Dockerfile
+!requirements.txt
+!alembic.ini
+!app/
+!app/**
+!migrations/
+!migrations/**
+**/__pycache__
+**/*.pyc
+
+!scripts/
+!scripts/bootstrap_admin.py
+!scripts/run_render.py

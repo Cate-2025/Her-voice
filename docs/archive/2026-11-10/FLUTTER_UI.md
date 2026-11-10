@@ -1,4 +1,8 @@
+> Archived snapshot, preserved 10 November 2026. Historical instructions and results may be superseded. Use the [current review documents](../../README.md).
+
 # HERVOICE Flutter UI — first design implementation
+
+> Historical planning/review reference. For current deployment steps and expected results, use [Deployment](DEPLOYMENT.md). Older implementation limits below may have been superseded.
 
 12 October 2026. Source: `flutter_app/`. This document records the implemented UI preview, separately from the backend foundation and full delivery roadmap.
 
@@ -53,7 +57,7 @@ All data and actions are clearly marked as preview. There is no live report conf
 
 `flutter analyze` reports no issues. Thirty Flutter widget tests pass, including the complete no-file preview journey, system-picker metadata interaction through a platform fake, and layouts at 390/1440 pixels plus 320-pixel screens with 1.8× text. A 600-pixel-high desktop with enlarged text is checked. These are layout and interaction checks, not a substitute for TalkBack or native device testing.
 
-The release web build succeeds. Screenshots of the actual browser-rendered app are in [ui-preview/](ui-preview/):
+The release web build succeeds. Screenshots of the actual browser-rendered app are in [ui-preview/](ui-preview):
 
 - [Desktop home](ui-preview/home-desktop.png)
 - [Phone home](ui-preview/home-phone.png)

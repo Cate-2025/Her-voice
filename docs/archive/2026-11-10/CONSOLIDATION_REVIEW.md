@@ -1,4 +1,8 @@
+> Archived snapshot, preserved 10 November 2026. Historical instructions and results may be superseded. Use the [current review documents](../../README.md).
+
 # HERVOICE consolidation and original-plan comparison
+
+> Historical planning/review reference. For current deployment steps and expected results, use [Deployment](DEPLOYMENT.md). Older implementation limits below may have been superseded.
 
 Reviewed 15 October 2026 against `/home/emmaa/Desktop/case.doc` (the supplied document contains sections 6–10), remote main `38b13df`, and backend `0993dde`. The user selected the redesigned Flutter interface with FastAPI. This is a first connected prototype milestone, not completion of the full concept paper.
 

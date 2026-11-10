@@ -1,0 +1,60 @@
+# External PostgreSQL, S3 and SMTP are provisioned separately. No demo seeding.
+name: hervoice
+x-api: &api
+  image: ${HERVOICE_IMAGE:-hervoice-api:local}
+  build:
+    context: ..
+  env_file:
+    - .env
+  user: "10001:10001"
+  read_only: true
+  tmpfs:
+    - /tmp:size=64m,mode=1777
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  logging:
+    driver: json-file
+    options: {max-size: "10m", max-file: "3"}
+services:
+  migrate:
+    <<: *api
+    command: [python, -m, alembic, upgrade, head]
+    restart: "no"
+    profiles: [tools]
+    networks: [data]
+  api:
+    <<: *api
+    restart: unless-stopped
+    networks: [ingress, data]
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/ready', timeout=15)"]
+      interval: 30s
+      timeout: 20s
+      start_period: 30s
+      retries: 3
+  proxy:
+    image: caddy:2.10.2-alpine
+    restart: unless-stopped
+    environment:
+      HERVOICE_HOST: ${HERVOICE_HOST:?Set the real DNS hostname}
+    ports: ["80:80", "443:443"]
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      ingress:
+        ipv4_address: 172.29.88.2
+    depends_on:
+      api: {condition: service_healthy}
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}
+networks:
+  ingress:
+    ipam:
+      config: [{subnet: 172.29.88.0/24}]
+  data: {}
+volumes:
+  caddy_data:
+  caddy_config:

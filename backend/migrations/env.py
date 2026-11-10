@@ -16,12 +16,12 @@ def run_migrations(connection):
 
 
 if context.is_offline_mode():
-    context.configure(url=settings.database_url, target_metadata=target_metadata, literal_binds=True)
+    context.configure(url=settings.migration_database_url, target_metadata=target_metadata, literal_binds=True)
     with context.begin_transaction():
         context.run_migrations()
 elif config.attributes.get('connection') is not None:
     run_migrations(config.attributes['connection'])
 else:
-    engine = create_engine(settings.database_url)
+    engine = create_engine(settings.migration_database_url)
     with engine.connect() as connection:
         run_migrations(connection)

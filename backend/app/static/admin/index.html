@@ -1,36 +1,34 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>HERVOICE Officer Dashboard</title>
-    <link rel="stylesheet" href="/admin/styles.css">
-  </head>
-  <body>
-    <main>
-      <header>
-        <p class="eyebrow">Authorised personnel only</p>
-        <h1>HERVOICE case review</h1>
-        <p>Reports are allegations. Review them under the university’s approved safeguarding process.</p>
-      </header>
-      <p id="message" role="status"></p>
-      <section id="login-panel" aria-labelledby="login-title">
-        <h2 id="login-title">Officer sign in</h2>
-        <form id="login-form">
-          <label>Email <input id="email" type="email" autocomplete="username" required></label>
-          <label>Password <input id="password" type="password" autocomplete="current-password" required></label>
-          <button>Sign in</button>
-        </form>
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HERVOICE · Case workspace</title><link rel="stylesheet" href="/admin/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <div class="workspace">
+    <header class="masthead"><a class="brand" href="/admin/"><img src="/admin/brand.svg" width="32" height="32" alt=""><span>her voice</span></a><span id="role-label" class="badge">Authorised personnel</span></header>
+    <main id="main-content" tabindex="-1">
+      <p id="message" role="status" aria-live="polite"></p>
+      <section id="login-panel" class="login-card" aria-labelledby="login-title">
+        <h1 id="login-title">Sign in to the case workspace</h1>
+        <p class="muted">Use your officer or administrator account to access the case workspace.</p>
+        <form id="login-form"><label>Email<input id="email" type="email" autocomplete="username" required></label><label>Password<input id="password" type="password" autocomplete="current-password" required></label><button id="login-button">Sign in</button></form>
+        <p class="small muted">Reports are allegations. Review them under the university’s approved process.</p>
       </section>
-      <section id="dashboard" hidden>
-        <div class="toolbar"><h2>Case queue</h2><button id="refresh" class="secondary">Refresh</button><button id="sign-out" class="secondary">Sign out</button></div>
-        <div class="grid">
-          <section><h3>Reports</h3><div id="case-list" class="list"></div></section>
-          <section><h3>Case details</h3><div id="case-detail">Select a report to view its timeline.</div></section>
-          <section><h3>Review alerts</h3><div id="alert-list" class="list"></div></section>
+      <div id="dashboard" hidden>
+        <div class="page-heading"><div><h1>Case workspace</h1><p class="muted">Follow each report, record progress and keep students informed.</p></div><div class="actions"><button id="refresh" class="secondary">Refresh</button><button id="sign-out" class="quiet">Sign out</button></div></div>
+        <p id="summary-state" class="small" role="status">Not loaded yet.</p><div class="summary" aria-label="All-report summary" aria-describedby="summary-state"><div><span id="count-total">—</span><p>All reports</p></div><div><span id="count-new">—</span><p>Awaiting receipt</p></div><div><span id="count-review">—</span><p>Under review</p></div><div><span id="count-alerts">—</span><p>Open review alerts</p></div></div>
+        <div class="case-grid">
+          <section class="queue panel" aria-labelledby="queue-heading"><div class="section-heading"><h2 id="queue-heading" tabindex="-1">Case queue</h2><span id="queue-count" class="muted small"></span></div><label class="small" for="status-filter">Filter by status</label><select id="status-filter"><option value="">All statuses</option><option value="submitted">Submitted</option><option value="received">Received</option><option value="under_review">Under review</option><option value="action_required">Action required</option><option value="closed">Closed</option></select><div id="related-context" class="notice" hidden><p id="related-label"></p><button id="clear-related" class="secondary">Show all references</button></div><p id="queue-state" class="small" role="status">Not loaded yet.</p><div id="case-list" class="case-list" aria-describedby="queue-state"></div><nav class="pagination" aria-label="Report pages"><button id="queue-prev" class="secondary" disabled>Previous reports</button><span id="queue-count-page" class="small">25 per page</span><button id="queue-next" class="secondary" disabled>Next reports</button></nav></section>
+          <section class="panel detail" aria-label="Case details"><div id="case-detail"><div class="empty"><h2 id="detail-heading">Select a report</h2><p>Choose a case from the queue to read its timeline and review the next status.</p></div></div></section>
         </div>
-      </section>
+        <section class="alerts-panel"><h2 id="alerts-heading" tabindex="-1">Recurring-report alerts</h2><p class="muted">These signals ask for a closer look. They are not findings of misconduct.</p><p id="alert-state" class="small" role="status">Not loaded yet.</p><div id="alert-list" class="alerts" aria-describedby="alert-state"></div><nav class="pagination" aria-label="Alert pages"><button id="alert-prev" class="secondary" disabled>Previous alerts</button><span id="alert-range" class="small"></span><button id="alert-next" class="secondary" disabled>Next alerts</button></nav></section>
+        <p class="footer-note">Student account identity is excluded from officer views. Narratives can still contain identifying details; handle them with care.</p>
+      </div>
     </main>
-    <script src="/admin/app.js"></script>
-  </body>
+  </div>
+  <dialog id="status-confirm" aria-labelledby="confirm-heading"><form method="dialog"><h2 id="confirm-heading">Update this case?</h2><p id="confirm-transition"></p><p id="confirm-description" class="muted"></p><p class="notice">The student’s case status will change and a neutral in-app update will be created. Enabled phone notifications may also be sent.</p><div class="actions"><button type="submit" value="cancel" class="secondary">Keep current status</button><button type="submit" value="confirm">Confirm update</button></div></form></dialog>
+  <script src="/admin/app.js"></script>
+</body>
 </html>

@@ -55,6 +55,23 @@ class OfficerReportResponse(ReportResponse):
     assigned_officer_id: UUID | None
 
 
+class OfficerCasePage(BaseModel):
+    items: list[OfficerReportResponse]
+    total: int
+
+
+class OfficerQueueSummary(BaseModel):
+    total: int
+    submitted: int
+    under_review: int
+    alerts: int
+
+
+class OfficerAlertPage(BaseModel):
+    items: list["PatternAlertResponse"]
+    total: int
+
+
 class TimelineEventResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: UUID
@@ -65,10 +82,12 @@ class TimelineEventResponse(BaseModel):
 
 class OfficerCaseDetail(OfficerReportResponse):
     timeline: list[TimelineEventResponse]
+    evidence: list["EvidenceSummary"] = Field(default_factory=list)
 
 
 class CaseStatusUpdate(BaseModel):
     status: CaseStatus
+    expected_status: CaseStatus | None = None
 
 
 class EvidenceUploadRequest(BaseModel):
@@ -122,6 +141,44 @@ class EvidenceSummary(BaseModel):
     verification_status: str
 
 
+class StatusHistoryEvent(BaseModel):
+    status: CaseStatus
+    occurred_at: datetime
+
+
 class StudentReportDetail(ReportResponse):
+    status_history: list[StatusHistoryEvent] = Field(default_factory=list)
     timeline: list[TimelineEventResponse]
     evidence: list[EvidenceSummary]
+
+
+class IdentityAccessRequest(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
+    reason: str = Field(min_length=10, max_length=500)
+
+
+class ReporterIdentityResponse(BaseModel):
+    email: str
+
+
+class PushDeviceRequest(BaseModel):
+    token: str = Field(min_length=20, max_length=1024, pattern=r"^\S+$")
+
+
+class EmailCodeRequest(BaseModel):
+    email: str = Field(max_length=255)
+    purpose: str = Field(pattern=r'^(register|reset)$')
+
+    @field_validator('email')
+    @classmethod
+    def valid_email(cls, value):
+        from email_validator import validate_email, EmailNotValidError
+        try:
+            return validate_email(value.strip(), check_deliverability=False, test_environment=True).normalized.lower()
+        except EmailNotValidError:
+            raise ValueError('Enter a valid email address')
+
+
+class EmailCodeComplete(EmailCodeRequest):
+    code: str = Field(pattern=r'^\d{8}$')
+    password: str = Field(min_length=12, max_length=128)

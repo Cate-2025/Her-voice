@@ -17,7 +17,7 @@ bearer_scheme = HTTPBearer(auto_error=False)
 
 def create_access_token(user: User) -> str:
     expires = datetime.now(UTC) + timedelta(minutes=settings.access_token_minutes)
-    return jwt.encode({"sub": str(user.id), "role": user.role.value, "exp": expires}, settings.jwt_secret, algorithm=settings.jwt_algorithm)
+    return jwt.encode({"sub": str(user.id), "role": user.role.value, "v": user.token_version or 0, "exp": expires}, settings.jwt_secret, algorithm=settings.jwt_algorithm)
 
 
 def authenticate_user(db: Session, email: str, password: str) -> User | None:
@@ -38,7 +38,7 @@ def get_current_user(
     except (jwt.PyJWTError, KeyError, ValueError) as exc:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired access token") from exc
     user = db.get(User, user_id)
-    if not user or not user.is_active:
+    if not user or not user.is_active or claims.get("v", 0) != user.token_version:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Account unavailable")
     return user
 

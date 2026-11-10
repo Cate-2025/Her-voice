@@ -31,3 +31,14 @@ def test_browser_preflight_is_restricted(client):
     assert response.headers['access-control-allow-origin'] == headers['Origin']
     headers['Origin'] = 'https://untrusted.example'
     assert client.options('/api/v1/auth/login', headers=headers).status_code == 400
+
+
+def test_student_status_history_has_dates_without_actor_identity(client, accounts, payload):
+    student,officer=accounts['student']['headers'],accounts['officer']['headers']
+    report_id=client.post('/api/v1/reports/drafts',json=payload,headers=student).json()['id']
+    client.post(f'/api/v1/reports/{report_id}/submit',headers=student)
+    for status in ('received','under_review'):
+        client.patch(f'/api/v1/officer/cases/{report_id}/status',json={'status':status},headers=officer)
+    history=client.get(f'/api/v1/reports/{report_id}',headers=student).json()['status_history']
+    assert [event['status'] for event in history] == ['submitted','received','under_review']
+    assert all(set(event) == {'status','occurred_at'} for event in history)

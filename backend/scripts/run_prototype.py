@@ -22,7 +22,9 @@ def main():
             file.write(secrets.token_urlsafe(48))
     pg = pixeltable_pgserver.get_server(data / 'postgres')
     os.environ.update(
-        APP_ENV='development', DATABASE_URL=pg.get_uri(driver='psycopg'),
+        APP_ENV='development', EVIDENCE_STORAGE='local', LOCAL_EVIDENCE_PATH=str(data / 'evidence'), DATABASE_URL=pg.get_uri(driver='psycopg'),
+        # Keep both application traffic and automatic prototype migrations local.
+        DATABASE_URL_UNPOOLED=pg.get_uri(driver='psycopg'),
         JWT_SECRET=secret_file.read_text(), OBJECT_STORAGE_ENDPOINT='http://127.0.0.1:9000',
         OBJECT_STORAGE_ACCESS_KEY='unused-prototype', OBJECT_STORAGE_SECRET_KEY='unused-prototype',
     )
@@ -37,7 +39,7 @@ def main():
         created = seed_users(db, password)
     print(f'{created} demo accounts created. Student: student@example.test; officer: officer@example.test')
     print('API: http://127.0.0.1:8000/docs | Officer dashboard: http://127.0.0.1:8000/admin/')
-    print('Fictional data only. Attachment uploads are not part of this milestone.')
+    print('Fictional data only. Verified attachments use private local prototype storage.')
     uvicorn.run('app.main:app', host='127.0.0.1', port=8000)
 
 

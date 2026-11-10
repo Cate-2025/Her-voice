@@ -32,3 +32,15 @@ backend/uploads/
 
 # Isolated local prototype database
 .prototype/
+
+# Firebase project configuration and private server credentials
+flutter_app/android/app/google-services.json
+.secrets/
+
+# Android release signing material
+key.properties
+*.jks
+*.keystore
+
+# Private per-machine service connection settings
+.env.local

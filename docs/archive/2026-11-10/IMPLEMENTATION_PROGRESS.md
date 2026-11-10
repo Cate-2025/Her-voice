@@ -1,4 +1,8 @@
+> Archived snapshot, preserved 10 November 2026. Historical instructions and results may be superseded. Use the [current review documents](../../README.md).
+
 # Consolidation update — 15 October 2026
+
+> Historical planning/review reference. For current deployment steps and expected results, use [Deployment](DEPLOYMENT.md). Older implementation limits below may have been superseded.
 
 The two branch histories are consolidated around Flutter/FastAPI. The first connected student-to-officer journey is implemented; see [the comparison and decisions](CONSOLIDATION_REVIEW.md) and [runbook](PROTOTYPE_RUNBOOK.md). The previous milestone notes below are historical; the default Flutter build now sends explicitly submitted reports to the configured server. Evidence uploads and durable offline storage remain unfinished.
 
@@ -61,7 +65,7 @@ Implemented the responsive Flutter shell and themed components, home, draft/case
 
 Flutter 3.47.7 / Dart 3.13.5 is installed in the workspace, with SDK version and dependency lockfile recorded. Android and web scaffolds are present. The web release build passes; `flutter analyze` reports no issues; 30 widget tests pass, including narrow/enlarged-text layouts and the complete demo journey. Browser screenshots were inspected and saved under `docs/ui-preview/`.
 
-P1 now has an implemented visual design to review. P3 has the UI shell and session editing, but encrypted persistent data is still pending. P4 remains a simulated UI journey; no API calls are made by the app. Native Android build/device verification remains pending because Java/toolchain configuration is incomplete. Read [FLUTTER_UI.md](FLUTTER_UI.md) and [flutter_app/README.md](../flutter_app/README.md) for launch instructions, design decisions, and limitations.
+P1 now has an implemented visual design to review. P3 has the UI shell and session editing, but encrypted persistent data is still pending. P4 remains a simulated UI journey; no API calls are made by the app. Native Android build/device verification remains pending because Java/toolchain configuration is incomplete. Read [FLUTTER_UI.md](FLUTTER_UI.md) and [flutter_app/README.md](../../../flutter_app/README.md) for launch instructions, design decisions, and limitations.
 
 ### Next after the UI preview
 

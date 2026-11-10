@@ -72,6 +72,84 @@
         ]
       }
     },
+    "/api/v1/auth/email-code": {
+      "post": {
+        "tags": [
+          "authentication"
+        ],
+        "summary": "Request Email Code",
+        "operationId": "request_email_code_api_v1_auth_email_code_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmailCodeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/email-code/complete": {
+      "post": {
+        "tags": [
+          "authentication"
+        ],
+        "summary": "Complete Email Code",
+        "operationId": "complete_email_code_api_v1_auth_email_code_complete_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmailCodeComplete"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/reports/drafts": {
       "post": {
         "tags": [
@@ -221,27 +299,62 @@
         ],
         "summary": "My Cases",
         "operationId": "my_cases_api_v1_cases_mine_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 100,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
+                  "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/ReportResponse"
                   },
-                  "type": "array",
                   "title": "Response My Cases Api V1 Cases Mine Get"
                 }
               }
             }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
           }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ]
+        }
       }
     },
     "/api/v1/reports": {
@@ -296,6 +409,7 @@
         ],
         "summary": "Create Upload Target",
         "operationId": "create_upload_target_api_v1_evidence_reports__report_id__upload_url_post",
+        "deprecated": true,
         "security": [
           {
             "HTTPBearer": []
@@ -324,13 +438,11 @@
           }
         },
         "responses": {
-          "201": {
+          "410": {
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EvidenceUploadTarget"
-                }
+                "schema": {}
               }
             }
           },
@@ -354,6 +466,111 @@
         ],
         "summary": "Evidence Download Url",
         "operationId": "evidence_download_url_api_v1_evidence__evidence_id__download_url_get",
+        "deprecated": true,
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "evidence_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Evidence Id"
+            }
+          }
+        ],
+        "responses": {
+          "410": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/evidence/reports/{report_id}/files/{evidence_id}": {
+      "put": {
+        "tags": [
+          "evidence"
+        ],
+        "summary": "Upload File",
+        "operationId": "upload_file_api_v1_evidence_reports__report_id__files__evidence_id__put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "report_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Report Id"
+            }
+          },
+          {
+            "name": "evidence_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Evidence Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EvidenceSummary"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/evidence/{evidence_id}/file": {
+      "get": {
+        "tags": [
+          "evidence"
+        ],
+        "summary": "Download File",
+        "operationId": "download_file_api_v1_evidence__evidence_id__file_get",
         "security": [
           {
             "HTTPBearer": []
@@ -376,9 +593,7 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EvidenceDownloadTarget"
-                }
+                "schema": {}
               }
             }
           },
@@ -413,6 +628,36 @@
                   },
                   "type": "array",
                   "title": "Response List Notifications Api V1 Notifications Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/notifications/read-all": {
+      "post": {
+        "tags": [
+          "notifications"
+        ],
+        "summary": "Mark All Read",
+        "operationId": "mark_all_read_api_v1_notifications_read_all_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/NotificationResponse"
+                  },
+                  "type": "array",
+                  "title": "Response Mark All Read Api V1 Notifications Read All Post"
                 }
               }
             }
@@ -473,6 +718,317 @@
         }
       }
     },
+    "/api/v1/notifications/devices/register": {
+      "post": {
+        "tags": [
+          "notifications"
+        ],
+        "summary": "Register Device",
+        "operationId": "register_device_api_v1_notifications_devices_register_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PushDeviceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Register Device Api V1 Notifications Devices Register Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/notifications/devices/revoke": {
+      "post": {
+        "tags": [
+          "notifications"
+        ],
+        "summary": "Revoke Device",
+        "operationId": "revoke_device_api_v1_notifications_devices_revoke_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PushDeviceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Revoke Device Api V1 Notifications Devices Revoke Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/officer/case-page": {
+      "get": {
+        "tags": [
+          "officer dashboard"
+        ],
+        "summary": "Case Page",
+        "operationId": "case_page_api_v1_officer_case_page_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "status_filter",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/CaseStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status Filter"
+            }
+          },
+          {
+            "name": "staff_ref",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 128
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Staff Ref"
+            }
+          },
+          {
+            "name": "window_start",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Window Start"
+            }
+          },
+          {
+            "name": "window_end",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Window End"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 100,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OfficerCasePage"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/officer/case-summary": {
+      "get": {
+        "tags": [
+          "officer dashboard"
+        ],
+        "summary": "Case Summary",
+        "operationId": "case_summary_api_v1_officer_case_summary_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OfficerQueueSummary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/officer/alert-page": {
+      "get": {
+        "tags": [
+          "officer dashboard"
+        ],
+        "summary": "Alert Page",
+        "operationId": "alert_page_api_v1_officer_alert_page_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 100,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OfficerAlertPage"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/officer/cases": {
       "get": {
         "tags": [
@@ -500,6 +1056,29 @@
                 }
               ],
               "title": "Status Filter"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 100,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
             }
           }
         ],
@@ -562,6 +1141,64 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OfficerCaseDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/officer/cases/{report_id}/reporter-identity": {
+      "post": {
+        "tags": [
+          "officer dashboard"
+        ],
+        "summary": "Reporter Identity",
+        "operationId": "reporter_identity_api_v1_officer_cases__report_id__reporter_identity_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "report_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Report Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IdentityAccessRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReporterIdentityResponse"
                 }
               }
             }
@@ -644,27 +1281,62 @@
         ],
         "summary": "Pattern Alerts",
         "operationId": "pattern_alerts_api_v1_officer_pattern_alerts_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 100,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
+                  "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/PatternAlertResponse"
                   },
-                  "type": "array",
                   "title": "Response Pattern Alerts Api V1 Officer Pattern Alerts Get"
                 }
               }
             }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
           }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ]
+        }
       }
     },
     "/api/v1/officer/pattern-alerts/{alert_id}/review": {
@@ -759,6 +1431,16 @@
         "properties": {
           "status": {
             "$ref": "#/components/schemas/CaseStatus"
+          },
+          "expected_status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CaseStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -767,18 +1449,58 @@
         ],
         "title": "CaseStatusUpdate"
       },
-      "EvidenceDownloadTarget": {
+      "EmailCodeComplete": {
         "properties": {
-          "download_url": {
+          "email": {
             "type": "string",
-            "title": "Download Url"
+            "maxLength": 255,
+            "title": "Email"
+          },
+          "purpose": {
+            "type": "string",
+            "pattern": "^(register|reset)$",
+            "title": "Purpose"
+          },
+          "code": {
+            "type": "string",
+            "pattern": "^\\d{8}$",
+            "title": "Code"
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 12,
+            "title": "Password"
           }
         },
         "type": "object",
         "required": [
-          "download_url"
+          "email",
+          "purpose",
+          "code",
+          "password"
         ],
-        "title": "EvidenceDownloadTarget"
+        "title": "EmailCodeComplete"
+      },
+      "EmailCodeRequest": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "maxLength": 255,
+            "title": "Email"
+          },
+          "purpose": {
+            "type": "string",
+            "pattern": "^(register|reset)$",
+            "title": "Purpose"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "purpose"
+        ],
+        "title": "EmailCodeRequest"
       },
       "EvidenceSummary": {
         "properties": {
@@ -847,30 +1569,6 @@
         ],
         "title": "EvidenceUploadRequest"
       },
-      "EvidenceUploadTarget": {
-        "properties": {
-          "evidence_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Evidence Id"
-          },
-          "object_key": {
-            "type": "string",
-            "title": "Object Key"
-          },
-          "upload_url": {
-            "type": "string",
-            "title": "Upload Url"
-          }
-        },
-        "type": "object",
-        "required": [
-          "evidence_id",
-          "object_key",
-          "upload_url"
-        ],
-        "title": "EvidenceUploadTarget"
-      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -883,6 +1581,21 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "IdentityAccessRequest": {
+        "properties": {
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 10,
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "reason"
+        ],
+        "title": "IdentityAccessRequest"
       },
       "LoginRequest": {
         "properties": {
@@ -942,6 +1655,27 @@
           "created_at"
         ],
         "title": "NotificationResponse"
+      },
+      "OfficerAlertPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PatternAlertResponse"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "OfficerAlertPage"
       },
       "OfficerCaseDetail": {
         "properties": {
@@ -1017,6 +1751,13 @@
             },
             "type": "array",
             "title": "Timeline"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/EvidenceSummary"
+            },
+            "type": "array",
+            "title": "Evidence"
           }
         },
         "type": "object",
@@ -1033,6 +1774,55 @@
           "timeline"
         ],
         "title": "OfficerCaseDetail"
+      },
+      "OfficerCasePage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/OfficerReportResponse"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "OfficerCasePage"
+      },
+      "OfficerQueueSummary": {
+        "properties": {
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "submitted": {
+            "type": "integer",
+            "title": "Submitted"
+          },
+          "under_review": {
+            "type": "integer",
+            "title": "Under Review"
+          },
+          "alerts": {
+            "type": "integer",
+            "title": "Alerts"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total",
+          "submitted",
+          "under_review",
+          "alerts"
+        ],
+        "title": "OfficerQueueSummary"
       },
       "OfficerReportResponse": {
         "properties": {
@@ -1166,6 +1956,22 @@
         ],
         "title": "PatternAlertResponse"
       },
+      "PushDeviceRequest": {
+        "properties": {
+          "token": {
+            "type": "string",
+            "maxLength": 1024,
+            "minLength": 20,
+            "pattern": "^\\S+$",
+            "title": "Token"
+          }
+        },
+        "type": "object",
+        "required": [
+          "token"
+        ],
+        "title": "PushDeviceRequest"
+      },
       "ReportCreate": {
         "properties": {
           "report_mode": {
@@ -1293,6 +2099,19 @@
         ],
         "title": "ReportResponse"
       },
+      "ReporterIdentityResponse": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "title": "Email"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email"
+        ],
+        "title": "ReporterIdentityResponse"
+      },
       "Role": {
         "type": "string",
         "enum": [
@@ -1301,6 +2120,24 @@
           "admin"
         ],
         "title": "Role"
+      },
+      "StatusHistoryEvent": {
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/CaseStatus"
+          },
+          "occurred_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Occurred At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "occurred_at"
+        ],
+        "title": "StatusHistoryEvent"
       },
       "StudentReportDetail": {
         "properties": {
@@ -1357,6 +2194,13 @@
               }
             ],
             "title": "Submitted At"
+          },
+          "status_history": {
+            "items": {
+              "$ref": "#/components/schemas/StatusHistoryEvent"
+            },
+            "type": "array",
+            "title": "Status History"
           },
           "timeline": {
             "items": {

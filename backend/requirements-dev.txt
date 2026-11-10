@@ -1,3 +1,7 @@
 -r requirements.txt
 # Local real-PostgreSQL test runtime; no Docker/admin rights required.
 pixeltable-pgserver==0.6.0
+
+# Test tools are not installed in the runtime image.
+pytest==9.0.2
+httpx==0.28.1
